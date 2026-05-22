@@ -9,63 +9,50 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function login(): void
     {
         $this->validate();
-
         $this->form->authenticate();
-
         Session::regenerate();
-
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>
 
 <div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to your workshop dashboard.</p>
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+    @if (session('status'))
+        <div class="mb-4 small" style="color:var(--success)">{{ session('status') }}</div>
+    @endif
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="login" class="auth-form">
+        <label class="auth-field">
+            <span>Email</span>
+            <input wire:model="form.email" type="email" name="email" required autofocus autocomplete="username" />
+            @error('form.email')<span class="auth-hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+        </label>
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        <label class="auth-field">
+            <span>
+                Password
+                @if (Route::has('password.request'))
+                    <a class="auth-link-r" href="{{ route('password.request') }}" wire:navigate>Forgot?</a>
+                @endif
+            </span>
+            <input wire:model="form.password" type="password" name="password" required autocomplete="current-password" />
+            @error('form.password')<span class="auth-hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+        </label>
 
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
+        <label class="auth-check">
+            <input wire:model="form.remember" type="checkbox" name="remember" />
+            <span>Keep me signed in for 30 days</span>
+        </label>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        <button type="submit" class="primary-btn primary-btn-lg auth-submit">Sign in →</button>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <p class="auth-foot">
+            New here? <a href="{{ route('register') }}" wire:navigate>Open a workshop account</a>
+        </p>
     </form>
 </div>

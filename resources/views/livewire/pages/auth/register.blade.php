@@ -10,79 +10,130 @@ use Livewire\Volt\Component;
 
 new #[Layout('layouts.guest')] class extends Component
 {
+    public int $step = 1;
     public string $name = '';
+    public string $workshop = '';
     public string $email = '';
     public string $password = '';
-    public string $password_confirmation = '';
+    public string $plan = 'Pro';
+    public string $country = 'United Kingdom';
+    public bool $agreed = true;
 
-    /**
-     * Handle an incoming registration request.
-     */
+    public function next(): void
+    {
+        $this->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'string', 'min:10'],
+        ]);
+        $this->step = 2;
+    }
+
+    public function back(): void { $this->step = 1; }
+
     public function register(): void
     {
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        $this->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'string', Rules\Password::defaults()],
+            'plan'     => ['required', 'in:Pro,Trade,VIP'],
+            'agreed'   => ['accepted'],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $user = User::create([
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => Hash::make($this->password),
+        ]);
+        $user->syncRoles(['customer']);
 
-        event(new Registered($user = User::create($validated)));
-
+        event(new Registered($user));
         Auth::login($user);
-
         $this->redirect(route('dashboard', absolute: false), navigate: true);
     }
 }; ?>
 
 <div>
-    <form wire:submit="register">
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+    <h1 class="auth-title">Open a workshop account</h1>
+    <p class="auth-sub">Step {{ $step }} of 2 · takes about a minute.</p>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+    <div class="auth-steps">
+        <span class="auth-step {{ $step >= 1 ? 'auth-step-on' : '' }}"></span>
+        <span class="auth-step {{ $step >= 2 ? 'auth-step-on' : '' }}"></span>
+    </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="{{ $step === 1 ? 'next' : 'register' }}" class="auth-form">
+        @if ($step === 1)
+            <div class="auth-row-2">
+                <label class="auth-field">
+                    <span>Your name</span>
+                    <input wire:model="name" placeholder="Sam Okafor" autofocus required />
+                    @error('name')<span class="auth-hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+                </label>
+                <label class="auth-field">
+                    <span>Workshop</span>
+                    <input wire:model="workshop" placeholder="Bristol Motorworks" />
+                </label>
+            </div>
+            <label class="auth-field">
+                <span>Email</span>
+                <input wire:model="email" type="email" placeholder="you@workshop.co.uk" required />
+                @error('email')<span class="auth-hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+            </label>
+            <label class="auth-field">
+                <span>Password</span>
+                <input wire:model="password" type="password" placeholder="At least 10 characters" required minlength="10" />
+                <span class="auth-hint">Use a passphrase. We will send a magic link as backup.</span>
+                @error('password')<span class="auth-hint" style="color:var(--danger)">{{ $message }}</span>@enderror
+            </label>
+            <button type="submit" class="primary-btn primary-btn-lg auth-submit">Continue →</button>
+        @else
+            <div class="auth-field">
+                <span>Pick a plan</span>
+                <div class="auth-plans">
+                    @foreach ([
+                        ['Pro',   '£32 / file', 'pay-as-you-go · best to start'],
+                        ['Trade', '£24 / file', '50-pack · 30+ files / month'],
+                        ['VIP',   'custom',     'dedicated tuners · contact us'],
+                    ] as [$id, $price, $sub])
+                        <button type="button" wire:click="$set('plan', '{{ $id }}')"
+                                class="auth-plan {{ $plan === $id ? 'auth-plan-on' : '' }}">
+                            <div class="auth-plan-head">
+                                <span>{{ $id }}</span>
+                                <span class="auth-plan-price mono">{{ $price }}</span>
+                            </div>
+                            <div class="auth-plan-sub small">{{ $sub }}</div>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
 
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <label class="auth-field">
+                <span>Country</span>
+                <select wire:model="country">
+                    <option>United Kingdom</option>
+                    <option>Germany</option>
+                    <option>France</option>
+                    <option>Spain</option>
+                    <option>United States</option>
+                    <option>Other</option>
+                </select>
+            </label>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <label class="auth-check">
+                <input wire:model="agreed" type="checkbox" required />
+                <span>I agree to the <a href="#">terms of service</a> and <a href="#">tuner agreement</a>.</span>
+            </label>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <div class="auth-row-2">
+                <button type="button" wire:click="back" class="ghost-btn ghost-btn-lg auth-submit">← Back</button>
+                <button type="submit" class="primary-btn primary-btn-lg auth-submit">Create account →</button>
+            </div>
+        @endif
 
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
+        <p class="auth-foot">
+            Already have an account? <a href="{{ route('login') }}" wire:navigate>Sign in</a>
+        </p>
     </form>
 </div>
