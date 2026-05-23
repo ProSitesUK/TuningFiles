@@ -1,5 +1,5 @@
 <div class="page page-flush">
-    <div class="three-pane">
+    <div class="three-pane {{ $selected ? 'tp-make' : '' }}">
         {{-- LEFT --}}
         <div class="pane pane-l">
             <div class="pane-head">
@@ -47,10 +47,13 @@
             @if ($sel)
                 @php $cp = $sel->customerProfile; @endphp
                 <div class="pane-head">
-                    <div class="crumbs-sm">
-                        <span>Customers</span>
-                        <x-icon name="chevron" size="12" />
-                        <span class="crumb-active">{{ $sel->name }}</span>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <button type="button" wire:click="$set('selected', null)" class="tp-back">← List</button>
+                        <div class="crumbs-sm">
+                            <span>Customers</span>
+                            <x-icon name="chevron" size="12" />
+                            <span class="crumb-active">{{ $sel->name }}</span>
+                        </div>
                     </div>
                     <button class="ghost-btn ghost-btn-sm" type="button">Impersonate</button>
                 </div>

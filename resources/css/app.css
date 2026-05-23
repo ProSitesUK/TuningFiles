@@ -1065,6 +1065,14 @@ input { font: inherit; color: inherit; }
 /* --- Mobile admin (sidebar + three-pane + topbar + spacing) -------------- */
 .admin-hamburger { display: none; }
 .sidebar-scrim { display: none; }
+.tp-back {
+  display: none;
+  align-items: center; gap: 4px;
+  border: 0; background: transparent;
+  color: var(--muted); font-size: 12px; font-weight: 500;
+  cursor: pointer; padding: 0; white-space: nowrap;
+}
+.tp-back:hover { color: var(--ink); }
 
 @media (max-width: 768px) {
   /* App shell: sidebar becomes off-canvas */
@@ -1106,16 +1114,25 @@ input { font: inherit; color: inherit; }
   /* Page padding */
   .page { padding: 16px 16px 60px; }
 
-  /* Three-pane: single column */
+  /* Three-pane: single column — show one pane at a time */
   .three-pane {
     grid-template-columns: 1fr;
     height: auto; min-height: auto;
   }
-  .pane { border-right: 0; border-bottom: 1px solid var(--border); min-height: 50vh; }
-  .pane-r { display: none; }
+  .pane { border-right: 0; min-height: 80vh; }
+  /* Default: show only left pane */
   .three-pane .pane-m { display: none; }
-  .three-pane.tp-detail .pane-l { display: none; }
-  .three-pane.tp-detail .pane-m { display: flex; }
+  .three-pane .pane-r { display: none; }
+  /* Make selected → show models pane, hide makes */
+  .three-pane.tp-make .pane-l { display: none; }
+  .three-pane.tp-make .pane-m { display: flex; }
+  .three-pane.tp-make .pane-r { display: none; }
+  /* Model selected → show variants pane, hide makes + models */
+  .three-pane.tp-model .pane-l { display: none; }
+  .three-pane.tp-model .pane-m { display: none; }
+  .three-pane.tp-model .pane-r { display: flex; }
+  /* Back buttons visible */
+  .tp-back { display: inline-flex; }
 
   /* Tuner rows */
   .tuner-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 8px; }

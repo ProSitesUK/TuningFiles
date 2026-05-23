@@ -1,5 +1,5 @@
 <div class="page page-flush">
-    <div class="three-pane">
+    <div class="three-pane {{ $selectedModelId ? 'tp-model' : ($selectedMakeId ? 'tp-make' : '') }}">
         {{-- ===================== MAKES PANE ===================== --}}
         <div class="pane pane-l">
             <div class="pane-head">
@@ -79,13 +79,16 @@
         {{-- ===================== MODELS PANE ===================== --}}
         <div class="pane pane-m">
             <div class="pane-head">
-                <h2 class="pane-title">
-                    Models
-                    @if ($selMake)
-                        <span class="t-mute small">· {{ $selMake->name }}</span>
-                    @endif
-                    <span class="t-mute mono small">{{ $models->count() }}</span>
-                </h2>
+                <div style="display:flex; align-items:center; gap:8px">
+                    <button type="button" wire:click="$set('selectedMakeId', null)" class="tp-back">← Makes</button>
+                    <h2 class="pane-title">
+                        Models
+                        @if ($selMake)
+                            <span class="t-mute small">· {{ $selMake->name }}</span>
+                        @endif
+                        <span class="t-mute mono small">{{ $models->count() }}</span>
+                    </h2>
+                </div>
                 @if ($selectedMakeId)
                     <button type="button" wire:click="newModel" class="primary-btn primary-btn-sm">+ New</button>
                 @endif
@@ -168,13 +171,16 @@
         {{-- ===================== VARIANTS PANE ===================== --}}
         <div class="pane pane-r">
             <div class="pane-head">
-                <h2 class="pane-title">
-                    Variants
-                    @if ($selModel)
-                        <span class="t-mute small">· {{ $selModel->name }}</span>
-                    @endif
-                    <span class="t-mute mono small">{{ $variants->count() }}</span>
-                </h2>
+                <div style="display:flex; align-items:center; gap:8px">
+                    <button type="button" wire:click="$set('selectedModelId', null)" class="tp-back">← Models</button>
+                    <h2 class="pane-title">
+                        Variants
+                        @if ($selModel)
+                            <span class="t-mute small">· {{ $selModel->name }}</span>
+                        @endif
+                        <span class="t-mute mono small">{{ $variants->count() }}</span>
+                    </h2>
+                </div>
                 @if ($selectedModelId)
                     <button type="button" wire:click="newVariant" class="primary-btn primary-btn-sm">+ New</button>
                 @endif

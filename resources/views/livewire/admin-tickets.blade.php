@@ -1,5 +1,5 @@
 <div class="page page-flush">
-    <div class="three-pane">
+    <div class="three-pane {{ $selected ? 'tp-make' : '' }}">
         {{-- LEFT: ticket list --}}
         <div class="pane pane-l">
             <div class="pane-head">
@@ -51,10 +51,13 @@
         <div class="pane pane-m">
             @if ($selTicket)
                 <div class="pane-head">
-                    <div class="crumbs-sm">
-                        <span>Tickets</span>
-                        <x-icon name="chevron" size="12" />
-                        <span class="crumb-active">{{ Str::limit($selTicket->subject, 40) }}</span>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <button type="button" wire:click="$set('selected', null)" class="tp-back">← List</button>
+                        <div class="crumbs-sm">
+                            <span>Tickets</span>
+                            <x-icon name="chevron" size="12" />
+                            <span class="crumb-active">{{ Str::limit($selTicket->subject, 40) }}</span>
+                        </div>
                     </div>
                     <div style="display:flex; gap:4px">
                         @if ($selTicket->status === 'open')
