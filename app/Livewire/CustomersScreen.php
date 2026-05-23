@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Dispute;
+use App\Models\Order;
+use App\Models\User;
+use Livewire\Component;
+
+class CustomersScreen extends Component
+{
+    public string $filter   = 'all';
+    public string $search   = '';
+    public ?int   $selected = null;
+
+    public function selectCustomer(int $id): void
+    {
+        $this->selected = $id;
+    }
+
+    public function render()
+    {
+        $q = User::role('customer')->with('customerProfile')->withCount('orders');
+
+        if ($this->search !== '') {
+            $q->where('name', 'like', '%'.$this->search.'%');
+        }
+        if (in_array($this->filter, ['Pro','Trade','VIP'], true)) {
+            $q->whereHas('customerProfile', fn ($x) => $x->where('plan', $this->filter));
+        }
+        if ($this->filter === 'flag') {
+            $q->whereExists(function ($x) {
+                $x->select('id')->from('orders')->whereColumn('orders.customer_id', 'users.id')
+                  ->whereExists(function ($y) {
+                      $y->select('id')->from('disputes')->whereColumn('disputes.order_id', 'orders.id')->where('disputes.status', 'open');
+                  });
+            });
+        }
+
+        $customers = $q->orderByDesc('orders_count')->get();
+
+        if ($customers->isNotEmpty() && (! $this->selected || $customers->whereStrict('id', $this->selected)->isEmpty())) {
+            $this->selected = $customers->first()->id;
+        }
+
+        $sel = $this->selected
+            ? User::with('customerProfile')->withCount('orders')->find($this->selected)
+            : null;
+
+        $orders = $sel
+            ? Order::where('customer_id', $sel->id)->with('vehicle', 'ecu')->orderByDesc('reference')->limit(12)->get()
+            : collect();
+
+        $disputesCount = $sel ? Dispute::whereIn('order_id', $orders->pluck('id'))->where('status', 'open')->count() : 0;
+        $refundsTotal  = $sel ? Order::where('customer_id', $sel->id)->where('status', 'refunded')->sum('credits_cost') : 0;
+
+        return view('livewire.customers-screen', [
+            'customers'     => $customers,
+            'sel'           => $sel,
+            'orders'        => $orders,
+            'disputesCount' => $disputesCount,
+            'refundsTotal'  => $refundsTotal,
+        ]);
+    }
+}
