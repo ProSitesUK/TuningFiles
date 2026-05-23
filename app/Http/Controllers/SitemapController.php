@@ -10,9 +10,19 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $entries = [
-            ['loc' => route('home'),     'changefreq' => 'weekly', 'priority' => '1.0'],
-            ['loc' => route('vehicles'), 'changefreq' => 'daily',  'priority' => '0.9'],
+            ['loc' => route('home'),       'changefreq' => 'weekly', 'priority' => '1.0'],
+            ['loc' => route('vehicles'),   'changefreq' => 'daily',  'priority' => '0.9'],
+            ['loc' => route('blog.index'), 'changefreq' => 'daily',  'priority' => '0.8'],
         ];
+
+        foreach (\App\Models\Post::published()->orderByDesc('published_at')->get() as $post) {
+            $entries[] = [
+                'loc'        => route('blog.show', $post),
+                'lastmod'    => optional($post->updated_at)->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority'   => '0.7',
+            ];
+        }
 
         // Every active make + every active model = an indexable landing page.
         $makes = \App\Models\VehicleMake::where('is_active', true)

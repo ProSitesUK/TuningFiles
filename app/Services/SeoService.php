@@ -76,6 +76,11 @@ class SeoService
         $route = request()->route();
         $routeName = $route?->getName() ?? 'unknown';
 
+        $post = $route?->parameter('post');
+        if ($post instanceof \App\Models\Post) {
+            return ['post', (string) $post->id, $this->postDefaults($post)];
+        }
+
         $model = $route?->parameter('model');
         if ($model instanceof \App\Models\VehicleModel) {
             $make = $route->parameter('make') ?: $model->make;
@@ -88,6 +93,48 @@ class SeoService
         }
 
         return ['route', $routeName, []];
+    }
+
+    private function postDefaults(\App\Models\Post $post): array
+    {
+        $desc = $post->seo_description ?: $post->excerpt
+            ?: \Illuminate\Support\Str::limit(strip_tags($post->bodyHtml()), 160);
+
+        return [
+            'title'       => $post->title,
+            'description' => $desc,
+            'og_image'    => $post->cover_image,
+            'structured_data' => [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    [
+                        '@type' => 'BreadcrumbList',
+                        'itemListElement' => [
+                            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home')],
+                            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blog', 'item' => route('blog.index')],
+                            ['@type' => 'ListItem', 'position' => 3, 'name' => $post->title],
+                        ],
+                    ],
+                    array_filter([
+                        '@type'         => 'Article',
+                        'headline'      => $post->title,
+                        'description'   => $desc,
+                        'image'         => $post->cover_image,
+                        'datePublished' => optional($post->published_at)->toAtomString(),
+                        'dateModified'  => optional($post->updated_at)->toAtomString(),
+                        'author'        => $post->author ? [
+                            '@type' => 'Person',
+                            'name'  => $post->author->name,
+                        ] : null,
+                        'publisher' => [
+                            '@type' => 'Organization',
+                            'name'  => \App\Models\SiteSetting::get('site_name', 'TuningFiles'),
+                        ],
+                        'url' => route('blog.show', $post),
+                    ]),
+                ],
+            ],
+        ];
     }
 
     private function makeDefaults(\App\Models\VehicleMake $make): array

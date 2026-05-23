@@ -15,6 +15,7 @@
                     <a href="#how">How it works</a>
                     <a href="{{ route('vehicles') }}">Supported</a>
                     <a href="#pricing">Pricing</a>
+                    <a href="{{ route('blog.index') }}">Blog</a>
                     <a href="#tuners">For tuners</a>
                 </nav>
                 <div class="mk-nav-actions">
@@ -230,6 +231,42 @@
                 @endforeach
             </div>
         </section>
+
+        {{-- =================== LATEST BLOG =================== --}}
+        @php
+            $latestPosts = \App\Models\Post::published()->orderByDesc('published_at')->limit(3)->get();
+        @endphp
+        @if ($latestPosts->isNotEmpty())
+            <section class="mk-section">
+                <div class="mk-section-head" style="display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+                    <div>
+                        <span class="mk-kicker">From the blog</span>
+                        <h2 class="mk-section-title" style="margin-top:8px">Latest reads.</h2>
+                    </div>
+                    <a href="{{ route('blog.index') }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">All posts →</a>
+                </div>
+                <div class="vb-grid">
+                    @foreach ($latestPosts as $post)
+                        <a href="{{ route('blog.show', $post) }}" class="vb-card vb-card-link" style="text-decoration:none; color:inherit">
+                            <div class="vb-card-media">
+                                @if ($post->cover_image)
+                                    <img src="{{ $post->cover_image }}" alt="{{ $post->title }}" loading="lazy" />
+                                @else
+                                    <div class="vb-card-media-fallback"><span class="mono">Blog</span></div>
+                                @endif
+                            </div>
+                            <div class="vb-card-body">
+                                <div class="vb-card-make small mono">{{ optional($post->published_at)->format('j M Y') }}</div>
+                                <h3 class="vb-card-model" style="font-size:17px">{{ $post->title }}</h3>
+                                @if ($post->excerpt)
+                                    <p class="vb-card-meta small t-mute" style="margin-top:4px; line-height:1.5">{{ Str::limit($post->excerpt, 110) }}</p>
+                                @endif
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         {{-- =================== PRICING =================== --}}
         <section id="pricing" class="mk-section">

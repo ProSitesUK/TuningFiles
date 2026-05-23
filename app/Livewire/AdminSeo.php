@@ -49,10 +49,21 @@ class AdminSeo extends Component
                     'hint'  => 'Model landing page',
                 ])->all();
         }
+        if ($this->tab === 'posts') {
+            return \App\Models\Post::orderByDesc('updated_at')->get()
+                ->map(fn ($p) => [
+                    'type'  => 'post',
+                    'key'   => (string) $p->id,
+                    'label' => $p->title.($p->is_published ? '' : ' (draft)'),
+                    'path'  => '/blog/'.$p->slug,
+                    'hint'  => 'Blog post · auto-uses excerpt for description if no override',
+                ])->all();
+        }
 
         return [
             ['type' => 'route', 'key' => 'home',     'label' => 'Homepage',        'path' => '/',         'hint' => 'The marketing landing page (/)'],
             ['type' => 'route', 'key' => 'vehicles', 'label' => 'Vehicles browse', 'path' => '/vehicles', 'hint' => 'Make-first browse at /vehicles'],
+            ['type' => 'route', 'key' => 'blog.index', 'label' => 'Blog index',    'path' => '/blog',     'hint' => 'Blog listing'],
         ];
     }
 

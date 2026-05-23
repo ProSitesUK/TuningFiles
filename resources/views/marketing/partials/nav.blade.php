@@ -12,6 +12,7 @@
             <a href="{{ route('home') }}#how">How it works</a>
             <a href="{{ route('vehicles') }}">Supported</a>
             <a href="{{ route('home') }}#pricing">Pricing</a>
+            <a href="{{ route('blog.index') }}">Blog</a>
             <a href="{{ route('home') }}#tuners">For tuners</a>
         </nav>
         <div class="mk-nav-actions">

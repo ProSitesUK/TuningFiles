@@ -18,6 +18,9 @@ Route::get('/vehicles/{make:slug}/{model:slug}', [\App\Http\Controllers\VehicleP
     ->scopeBindings()
     ->name('vehicles.model');
 
+Route::get('/blog',          [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{post:slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+
 /* SEO */
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
@@ -68,6 +71,7 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/revenue',   'admin.placeholder')->name('revenue');
         Route::view('/credits',   'admin.placeholder')->name('credits');
         Route::view('/reports',   'admin.placeholder')->name('reports');
+        Route::view('/blog',      'admin.blog')->name('blog');
         Route::view('/seo',       'admin.seo')->name('seo');
         Route::view('/settings',  'admin.settings')->name('settings');
     });

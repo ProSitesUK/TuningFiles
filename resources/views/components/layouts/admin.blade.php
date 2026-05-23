@@ -35,6 +35,9 @@
             ['id' => 'admin.credits',  'label' => 'Credits', 'icon' => 'credits'],
             ['id' => 'admin.reports',  'label' => 'Reports', 'icon' => 'reports'],
         ]],
+        ['heading' => 'Content', 'items' => [
+            ['id' => 'admin.blog', 'label' => 'Blog', 'icon' => 'reports'],
+        ]],
         ['heading' => 'System', 'items' => [
             ['id' => 'admin.seo',      'label' => 'SEO',      'icon' => 'reports'],
             ['id' => 'admin.settings', 'label' => 'Settings', 'icon' => 'reports'],
@@ -54,6 +57,7 @@
         'admin.revenue'   => ['Business', 'Revenue'],
         'admin.credits'   => ['Business', 'Credits'],
         'admin.reports'   => ['Business', 'Reports'],
+        'admin.blog'      => ['Content',  'Blog'],
         'admin.seo'       => ['System',   'SEO'],
         'admin.settings'  => ['System',   'Settings'],
     ];
