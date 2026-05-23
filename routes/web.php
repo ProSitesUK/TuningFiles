@@ -28,6 +28,10 @@ Route::middleware(['auth', 'verified', 'role:customer|admin'])
         Route::view('/', 'app.dashboard')->name('dashboard');
         Route::view('/orders', 'app.orders.index')->name('orders.index');
         Route::view('/orders/new', 'app.orders.new')->name('orders.new');
+        Route::get('/orders/{order}', function (\App\Models\Order $order) {
+            abort_unless($order->customer_id === auth()->id() || auth()->user()->isAdmin(), 403);
+            return view('app.orders.show', ['order' => $order]);
+        })->name('orders.show');
         Route::view('/credits', 'app.credits')->name('credits');
     });
 
