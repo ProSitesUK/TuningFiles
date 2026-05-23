@@ -178,6 +178,31 @@
             </div>
         </section>
 
+        {{-- =================== SHOWCASE =================== --}}
+        <section class="mk-section">
+            <div class="mk-section-head">
+                <span class="mk-kicker">Recent work</span>
+                <h2 class="mk-section-title">Files that left the queue this week.</h2>
+                <p class="mk-section-sub">A small selection from the 412 tuned today — every one checksum-correct, dyno-validated, original retained.</p>
+            </div>
+            <div class="mk-showcase">
+                @foreach ([
+                    ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=80', 'Porsche 911 GT3', 'Stage 1 · +38 hp'],
+                    ['https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=900&q=80', 'Audi R8 V10', 'Stage 2 · +62 hp'],
+                    ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&q=80', 'Chevrolet Camaro', 'Custom remap'],
+                    ['https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=900&q=80', 'Mercedes-AMG C63', 'Stage 1 + DPF'],
+                ] as [$src, $veh, $tag])
+                    <figure class="mk-shot">
+                        <img src="{{ $src }}" alt="{{ $veh }}" loading="lazy" />
+                        <figcaption class="mk-shot-caption">
+                            <span class="mk-shot-veh">{{ $veh }}</span>
+                            <span class="mk-shot-tag">{{ $tag }}</span>
+                        </figcaption>
+                    </figure>
+                @endforeach
+            </div>
+        </section>
+
         {{-- =================== PRICING =================== --}}
         <section id="pricing" class="mk-section">
             <div class="mk-section-head">
