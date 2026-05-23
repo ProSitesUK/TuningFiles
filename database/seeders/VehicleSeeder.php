@@ -12,6 +12,15 @@ class VehicleSeeder extends Seeder
 {
     public function run(): void
     {
+        // Rotated hero shots from Unsplash. Stuart can swap per-make via admin.
+        $heroPool = [
+            'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80', // Porsche
+            'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&q=80', // Audi R8
+            'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80', // Chevy Camaro
+            'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80', // Mercedes-AMG
+            'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&q=80', // generic
+        ];
+
         $sort = 0;
         foreach ($this->data() as $domain => $payload) {
             [$makeName, $models] = [$payload['name'], $payload['models']];
@@ -20,8 +29,8 @@ class VehicleSeeder extends Seeder
                 ['name' => $makeName],
                 [
                     'slug'       => Str::slug($makeName),
-                    'logo_url'   => "https://logo.clearbit.com/{$domain}",
-                    'image_url'  => $payload['image_url'] ?? null,
+                    'logo_url'   => "https://www.google.com/s2/favicons?domain={$domain}&sz=128",
+                    'image_url'  => $payload['image_url'] ?? $heroPool[$sort % count($heroPool)],
                     'sort_order' => $sort++,
                     'is_active'  => true,
                 ],
