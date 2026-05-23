@@ -52,7 +52,18 @@ class EcuSeeder extends Seeder
         foreach ($defaults as $model => $ecuIdentifier) {
             $ecu = Ecu::where('identifier', $ecuIdentifier)->first();
             if (! $ecu) continue;
-            Vehicle::where('model', $model)->get()->each(fn ($v) => $v->ecus()->syncWithoutDetaching([$ecu->id]));
+            Vehicle::whereHas('vehicleModel', fn ($q) => $q->where('name', $model))
+                ->get()
+                ->each(fn ($v) => $v->ecus()->syncWithoutDetaching([$ecu->id]));
         }
+
+        // Fallback: every variant without an ECU gets a fuel-appropriate default
+        // so the customer order wizard can progress past step 2 in the demo.
+        $petrolEcu = Ecu::where('identifier', 'MED17.5.25')->first();
+        $dieselEcu = Ecu::where('identifier', 'EDC17 CP44')->first();
+        Vehicle::doesntHave('ecus')->get()->each(function ($v) use ($petrolEcu, $dieselEcu) {
+            $ecu = $v->fuel === 'diesel' ? $dieselEcu : $petrolEcu;
+            if ($ecu) $v->ecus()->syncWithoutDetaching([$ecu->id]);
+        });
     }
 }

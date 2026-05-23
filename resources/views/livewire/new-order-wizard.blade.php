@@ -15,18 +15,46 @@
     <div class="card card-pad" style="max-width:760px">
         @if ($step === 1)
             <div class="metric-label" style="margin-bottom:10px">Pick your vehicle</div>
-            <div class="auth-plans" style="max-height:420px; overflow-y:auto">
-                @foreach ($vehicles as $v)
-                    <button type="button" wire:click="$set('vehicleId', {{ $v->id }})"
-                            class="auth-plan {{ $vehicleId === $v->id ? 'auth-plan-on' : '' }}">
-                        <div class="auth-plan-head">
-                            <span>{{ $v->displayName() }}</span>
-                            <span class="auth-plan-price mono">{{ $v->yearRange() }}</span>
-                        </div>
-                        <div class="auth-plan-sub small">{{ $v->fuel }} · {{ $v->displacement }} · stock {{ $v->stock_hp }} hp</div>
-                    </button>
-                @endforeach
+
+            <div class="va-grid-2" style="margin-bottom:14px">
+                <label class="va-field">
+                    <span>Make</span>
+                    <select wire:model.live="makeId">
+                        <option value="">Select make…</option>
+                        @foreach ($makes as $m)
+                            <option value="{{ $m->id }}">{{ $m->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="va-field">
+                    <span>Model</span>
+                    <select wire:model.live="modelId" {{ $makeId ? '' : 'disabled' }}>
+                        <option value="">{{ $makeId ? 'Select model…' : 'Pick a make first' }}</option>
+                        @foreach ($models as $m)
+                            <option value="{{ $m->id }}">{{ $m->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
             </div>
+
+            @if ($modelId)
+                <div class="metric-label" style="margin-bottom:8px">Pick the variant</div>
+                <div class="auth-plans" style="max-height:360px; overflow-y:auto">
+                    @forelse ($variants as $v)
+                        <button type="button" wire:click="$set('vehicleId', {{ $v->id }})"
+                                class="auth-plan {{ $vehicleId === $v->id ? 'auth-plan-on' : '' }}">
+                            <div class="auth-plan-head">
+                                <span>{{ $v->generation ?: $v->displayName() }}</span>
+                                <span class="auth-plan-price mono">{{ $v->yearRange() }}</span>
+                            </div>
+                            <div class="auth-plan-sub small">{{ $v->fuel }} · {{ $v->displacement }} · stock {{ $v->stock_hp }} hp</div>
+                        </button>
+                    @empty
+                        <div class="t-mute small">No active variants for this model yet.</div>
+                    @endforelse
+                </div>
+            @endif
+
             @error('vehicleId') <div class="auth-hint" style="color:var(--danger); margin-top:8px">{{ $message }}</div> @enderror
         @endif
 
@@ -86,7 +114,7 @@
                 <div class="card card-pad" style="background:var(--surface-2); margin-top:16px">
                     <div class="metric-label">Order summary</div>
                     <div class="meta-grid" style="grid-template-columns: repeat(2, 1fr); padding:8px 0; background:transparent; border:0">
-                        <div class="meta"><div class="metric-label">Vehicle</div><div class="meta-val">{{ optional($vehicles->firstWhere('id', $vehicleId))->displayName() }}</div></div>
+                        <div class="meta"><div class="metric-label">Vehicle</div><div class="meta-val">{{ optional(\App\Models\Vehicle::find($vehicleId))->displayName() }}</div></div>
                         <div class="meta"><div class="metric-label">ECU</div><div class="meta-val mono">{{ optional($ecus->firstWhere('id', $ecuId))->identifier }}</div></div>
                         <div class="meta"><div class="metric-label">Tune</div><div class="meta-val">{{ $tunes->whereIn('slug', $tuneSlugs)->pluck('label')->implode(' + ') }}</div></div>
                         <div class="meta"><div class="metric-label">Cost</div><div class="meta-val mono">{{ $totalCost }} cr</div></div>

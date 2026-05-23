@@ -79,7 +79,7 @@ class DemoSeeder extends Seeder
 
         // -------------------- Orders (match prototype #4471 -> #4460) --------------------
         $u  = fn (string $email) => User::where('email', $email)->value('id');
-        $vi = fn (string $model) => Vehicle::where('model', $model)->value('id');
+        $vi = fn (string $model) => Vehicle::whereHas('vehicleModel', fn ($q) => $q->where('name', $model))->value('id');
         $ei = fn (string $ident) => Ecu::where('identifier', $ident)->value('id');
 
         $orders = [

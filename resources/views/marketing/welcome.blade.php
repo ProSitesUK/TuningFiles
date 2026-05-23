@@ -13,7 +13,7 @@
                 </a>
                 <nav class="mk-nav-links">
                     <a href="#how">How it works</a>
-                    <a href="#vehicles">Supported</a>
+                    <a href="{{ route('vehicles') }}">Supported</a>
                     <a href="#pricing">Pricing</a>
                     <a href="#tuners">For tuners</a>
                 </nav>
@@ -121,6 +121,34 @@
                 @endforeach
             </div>
         </section>
+
+        {{-- =================== FEATURED MAKES CAROUSEL =================== --}}
+        @php
+            $featuredMakes = \App\Models\VehicleMake::where('is_active', true)
+                ->whereNotNull('logo_url')
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get();
+        @endphp
+        @if ($featuredMakes->isNotEmpty())
+            <section class="mk-carousel">
+                <div class="mk-carousel-head">
+                    <span class="mk-kicker">Vehicles we cover</span>
+                    <h2 class="mk-carousel-title">{{ $featuredMakes->count() }} OEMs · 100+ models · every ECU we can read.</h2>
+                    <a href="{{ route('vehicles') }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">Browse all →</a>
+                </div>
+                <div class="mk-marquee" aria-hidden="true">
+                    <div class="mk-marquee-track">
+                        @foreach ($featuredMakes->concat($featuredMakes) as $m)
+                            <div class="mk-marquee-cell">
+                                <img src="{{ $m->logo_url }}" alt="{{ $m->name }}" loading="lazy" />
+                                <span>{{ $m->name }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
 
         {{-- =================== HOW IT WORKS =================== --}}
         <section id="how" class="mk-section">

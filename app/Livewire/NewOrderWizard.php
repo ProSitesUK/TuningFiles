@@ -8,6 +8,8 @@ use App\Models\OrderEvent;
 use App\Models\OrderFile;
 use App\Models\Tune;
 use App\Models\Vehicle;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -19,6 +21,8 @@ class NewOrderWizard extends Component
 
     public int $step = 1;
 
+    public ?int $makeId    = null;
+    public ?int $modelId   = null;
     public ?int $vehicleId = null;
     public ?int $ecuId     = null;
     /** @var array<string> */
@@ -48,6 +52,24 @@ class NewOrderWizard extends Component
     public function back(): void
     {
         if ($this->step > 1) $this->step--;
+    }
+
+    public function updatedMakeId(): void
+    {
+        $this->modelId = null;
+        $this->vehicleId = null;
+        $this->ecuId = null;
+    }
+
+    public function updatedModelId(): void
+    {
+        $this->vehicleId = null;
+        $this->ecuId = null;
+    }
+
+    public function updatedVehicleId(): void
+    {
+        $this->ecuId = null;
     }
 
     public function toggleTune(string $slug): void
@@ -137,8 +159,27 @@ class NewOrderWizard extends Component
 
     public function render()
     {
+        $makes = VehicleMake::where('is_active', true)
+            ->whereHas('models', fn ($q) => $q->where('is_active', true)->whereHas('variants', fn ($qq) => $qq->where('is_active', true)))
+            ->orderBy('name')->get();
+
+        $models = $this->makeId
+            ? VehicleModel::where('make_id', $this->makeId)
+                ->where('is_active', true)
+                ->whereHas('variants', fn ($q) => $q->where('is_active', true))
+                ->orderBy('name')->get()
+            : collect();
+
+        $variants = $this->modelId
+            ? Vehicle::where('model_id', $this->modelId)
+                ->where('is_active', true)
+                ->orderBy('year_start', 'desc')->get()
+            : collect();
+
         return view('livewire.new-order-wizard', [
-            'vehicles' => Vehicle::orderBy('make')->orderBy('model')->get(),
+            'makes'    => $makes,
+            'models'   => $models,
+            'variants' => $variants,
             'ecus'     => $this->vehicleId
                 ? Vehicle::find($this->vehicleId)?->ecus()->get() ?? collect()
                 : collect(),

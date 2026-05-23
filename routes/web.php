@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 /* Marketing */
 Route::view('/', 'marketing.welcome')->name('home');
+Route::view('/vehicles', 'marketing.vehicles')->name('vehicles');
 
 /* Post-login router (Breeze redirects here as 'dashboard') */
 Route::get('/dashboard', function () {
@@ -46,7 +47,7 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/customers', 'admin.customers')->name('customers');
         Route::view('/files',     'admin.placeholder')->name('files');
         Route::view('/tuners',    'admin.placeholder')->name('tuners');
-        Route::view('/vehicles',  'admin.placeholder')->name('vehicles');
+        Route::view('/vehicles',  'admin.vehicles')->name('vehicles');
         Route::view('/disputes',  'admin.placeholder')->name('disputes');
         Route::view('/tickets',   'admin.placeholder')->name('tickets');
         Route::view('/revenue',   'admin.placeholder')->name('revenue');
