@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomerProfile;
+use App\Models\TunerProfile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +13,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleSeeder::class);
+        $this->call(VehicleSeeder::class);
+        $this->call(EcuSeeder::class);
+        $this->call(TuneSeeder::class);
+        $this->call(CreditPackSeeder::class);
 
         $admin = User::firstOrCreate(
             ['email' => 'admin@tuningfiles.test'],
@@ -18,16 +24,9 @@ class DatabaseSeeder extends Seeder
         );
         $admin->syncRoles(['admin', 'operations']);
 
-        $tuner = User::firstOrCreate(
-            ['email' => 'aleks@tuningfiles.test'],
-            ['name' => 'Aleks R.', 'password' => Hash::make('password')],
-        );
-        $tuner->syncRoles(['tuner']);
+        $this->call(DemoSeeder::class);
 
-        $customer = User::firstOrCreate(
-            ['email' => 'jamie@example.com'],
-            ['name' => 'Jamie Marshall', 'password' => Hash::make('password')],
-        );
-        $customer->syncRoles(['customer']);
+        User::role('customer')->each(fn ($u) => CustomerProfile::firstOrCreate(['user_id' => $u->id], ['plan' => 'Pro']));
+        User::role('tuner')->each(fn ($u)    => TunerProfile::firstOrCreate(['user_id' => $u->id],    ['status' => 'off']));
     }
 }
