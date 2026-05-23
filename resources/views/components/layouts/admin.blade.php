@@ -35,6 +35,10 @@
             ['id' => 'admin.credits',  'label' => 'Credits', 'icon' => 'credits'],
             ['id' => 'admin.reports',  'label' => 'Reports', 'icon' => 'reports'],
         ]],
+        ['heading' => 'System', 'items' => [
+            ['id' => 'admin.seo',      'label' => 'SEO',      'icon' => 'reports'],
+            ['id' => 'admin.settings', 'label' => 'Settings', 'icon' => 'reports'],
+        ]],
     ];
 
     $crumbLabels = [
@@ -50,6 +54,8 @@
         'admin.revenue'   => ['Business', 'Revenue'],
         'admin.credits'   => ['Business', 'Credits'],
         'admin.reports'   => ['Business', 'Reports'],
+        'admin.seo'       => ['System',   'SEO'],
+        'admin.settings'  => ['System',   'Settings'],
     ];
     [$crumbGroup, $crumbLeaf] = $crumbLabels[$route] ?? ['', ''];
 @endphp

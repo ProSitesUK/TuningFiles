@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'marketing.welcome')->name('home');
 Route::view('/vehicles', 'marketing.vehicles')->name('vehicles');
 
+/* SEO */
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+
 /* Post-login router (Breeze redirects here as 'dashboard') */
 Route::get('/dashboard', function () {
     $u = Auth::user();
@@ -53,6 +57,8 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/revenue',   'admin.placeholder')->name('revenue');
         Route::view('/credits',   'admin.placeholder')->name('credits');
         Route::view('/reports',   'admin.placeholder')->name('reports');
+        Route::view('/seo',       'admin.seo')->name('seo');
+        Route::view('/settings',  'admin.settings')->name('settings');
     });
 
 require __DIR__.'/auth.php';
