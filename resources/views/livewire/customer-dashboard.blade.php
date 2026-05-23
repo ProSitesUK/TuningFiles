@@ -5,6 +5,11 @@
             <p class="page-sub">Pick up where you left off — or upload a new file.</p>
         </div>
         <div class="page-actions">
+            @php $ss = \App\Models\User::supportStatus(); @endphp
+            <span class="support-pill support-pill-{{ $ss }}">
+                <span class="dot dot-{{ $ss === 'online' ? 'ok' : ($ss === 'away' ? 'warn' : 'mute') }}"></span>
+                Support is {{ $ss }}
+            </span>
             <a href="{{ route('app.credits') }}" class="ghost-btn" style="text-decoration:none">Buy credits</a>
             <a href="{{ route('app.orders.new') }}" class="primary-btn" style="text-decoration:none"><x-icon name="plus" size="14" /> New tune</a>
         </div>

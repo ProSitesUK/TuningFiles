@@ -107,7 +107,9 @@
             <span class="avatar avatar-accent" style="width:32px;height:32px;font-size:12px">{{ auth()->user()->initials() }}</span>
             <div class="sidebar-user-text">
                 <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
-                <div class="sidebar-user-role">{{ auth()->user()->isAdmin() ? 'Operations · live' : (auth()->user()->isTuner() ? 'Tuner · live' : 'User') }}</div>
+                <div class="sidebar-user-role">
+                    <livewire:staff-status-toggle />
+                </div>
             </div>
             <form method="POST" action="{{ route('logout') }}">@csrf
                 <button type="submit" class="signout-btn" title="Sign out">

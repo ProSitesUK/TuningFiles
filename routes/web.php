@@ -52,6 +52,12 @@ Route::middleware(['auth', 'verified', 'role:customer|admin'])
             return view('app.orders.show', ['order' => $order]);
         })->name('orders.show');
         Route::view('/credits', 'app.credits')->name('credits');
+        Route::view('/tickets', 'app.tickets.index')->name('tickets.index');
+        Route::view('/tickets/new', 'app.tickets.new')->name('tickets.new');
+        Route::get('/tickets/{ticket}', function (\App\Models\Ticket $ticket) {
+            abort_unless($ticket->customer_id === auth()->id() || auth()->user()->isAdmin(), 403);
+            return view('app.tickets.show', ['ticket' => $ticket]);
+        })->name('tickets.show');
         Route::post('/checkout/{pack}', [\App\Http\Controllers\CheckoutController::class, 'start'])->name('checkout.start');
         Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
     });
@@ -67,7 +73,7 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/tuners',    'admin.placeholder')->name('tuners');
         Route::view('/vehicles',  'admin.vehicles')->name('vehicles');
         Route::view('/disputes',  'admin.placeholder')->name('disputes');
-        Route::view('/tickets',   'admin.placeholder')->name('tickets');
+        Route::view('/tickets',   'admin.tickets')->name('tickets');
         Route::view('/revenue',   'admin.placeholder')->name('revenue');
         Route::view('/credits',   'admin.placeholder')->name('credits');
         Route::view('/reports',   'admin.placeholder')->name('reports');

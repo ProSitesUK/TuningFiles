@@ -70,4 +70,8 @@
             </div>
         </div>
     </div>
+
+    <div style="margin-top:18px">
+        <a href="{{ route('app.tickets.new', ['order' => $order->id]) }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">Need help with this order?</a>
+    </div>
 </div>

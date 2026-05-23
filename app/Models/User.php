@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'status'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -50,5 +50,41 @@ class User extends Authenticatable
     public function creditBalance(): int
     {
         return (int) ($this->customerProfile?->credit_balance ?? 0);
+    }
+
+    public function isOnline(): bool  { return $this->status === 'online'; }
+    public function isAway(): bool    { return in_array($this->status, ['away', 'busy', 'holiday']); }
+    public function isOffline(): bool { return ! $this->isOnline() && ! $this->isAway(); }
+
+    public function statusDot(): string
+    {
+        if ($this->isOnline()) return 'ok';
+        if ($this->isAway()) return 'warn';
+        return 'mute';
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'online'  => 'Online',
+            'away'    => 'Away',
+            'busy'    => 'Busy',
+            'holiday' => 'Holiday',
+            default   => 'Offline',
+        };
+    }
+
+    public static function supportIsOnline(): bool
+    {
+        return self::role(['admin', 'operations', 'tuner'])
+            ->where('status', 'online')
+            ->exists();
+    }
+
+    public static function supportStatus(): string
+    {
+        if (self::supportIsOnline()) return 'online';
+        if (self::role(['admin', 'operations', 'tuner'])->whereIn('status', ['away', 'busy'])->exists()) return 'away';
+        return 'offline';
     }
 }
