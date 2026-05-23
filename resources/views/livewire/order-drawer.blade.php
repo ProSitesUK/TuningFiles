@@ -1,4 +1,4 @@
-<div x-data="{}" @keydown.escape.window="$wire.close()">
+<div x-data="{ reassignOpen: false }" @keydown.escape.window="$wire.close()">
     @php $open = (bool) $order; @endphp
 
     <div class="drawer-scrim {{ $open ? 'drawer-scrim-on' : '' }}" wire:click="close"></div>
@@ -9,7 +9,9 @@
                 $tuner = $order->assignedTuner;
                 $tp    = $tuner?->tunerProfile;
                 $c     = $order->customer;
-                $original = $order->originalFile() ?? null;
+                $isAdmin = auth()->user()->isAdmin();
+                $isTuner = auth()->user()->isTuner();
+                $canUpload = ($isAdmin || ($isTuner && $tuner?->id === auth()->id())) && in_array($order->status, ['in_progress','review','queued'], true);
             @endphp
 
             <div class="drawer-head">
@@ -36,13 +38,30 @@
                             <span class="t-mute mono small">{{ $order->elapsedLabel() }} elapsed</span>
                         </div>
                     </div>
-                    <div class="drawer-actions">
-                        <button class="ghost-btn ghost-btn-sm" type="button">Reassign</button>
-                        <button class="ghost-btn ghost-btn-sm" type="button"><x-icon name="refund" size="13" /> Refund</button>
-                        <button class="ghost-btn ghost-btn-sm ghost-btn-accent" type="button"><x-icon name="check" size="13" /> Mark ready</button>
-                        <button class="primary-btn primary-btn-sm" type="button"><x-icon name="flag" size="13" /> Flag dispute</button>
-                    </div>
+                    @if ($isAdmin)
+                        <div class="drawer-actions">
+                            <button class="ghost-btn ghost-btn-sm" type="button" @click="reassignOpen = !reassignOpen">Reassign</button>
+                            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="refund" wire:confirm="Refund this order and restore credits to the customer?"><x-icon name="refund" size="13" /> Refund</button>
+                            <button class="ghost-btn ghost-btn-sm ghost-btn-accent" type="button" wire:click="markReady" wire:confirm="Mark this order ready for delivery?"><x-icon name="check" size="13" /> Mark ready</button>
+                            <button class="primary-btn primary-btn-sm" type="button"><x-icon name="flag" size="13" /> Flag dispute</button>
+                        </div>
+                    @endif
                 </div>
+
+                @if ($isAdmin)
+                    <div x-show="reassignOpen" x-transition class="card card-pad" style="margin-bottom:14px">
+                        <div class="card-head"><div class="metric-label">Reassign to</div></div>
+                        <div style="display:flex; gap:8px; align-items:center">
+                            <select wire:model="reassignTo" style="flex:1; padding:7px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)">
+                                <option value="">Choose a tuner…</option>
+                                @foreach ($tuners as $u)
+                                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->tunerProfile?->status ?? 'off' }})</option>
+                                @endforeach
+                            </select>
+                            <button type="button" class="primary-btn primary-btn-sm" wire:click="reassign">Reassign</button>
+                        </div>
+                    </div>
+                @endif
 
                 <div class="meta-grid">
                     <div class="meta"><div class="metric-label">Vehicle</div><div class="meta-val">{{ $order->vehicle_label }} · {{ $order->vehicle_year }}</div></div>
@@ -54,25 +73,43 @@
                 </div>
 
                 <div class="drawer-grid">
-                    {{-- LEFT: file + timeline --}}
+                    {{-- LEFT: files + timeline --}}
                     <div>
                         <div class="card card-pad">
                             <div class="card-head">
-                                <div class="metric-label">File</div>
-                                <button class="ghost-btn ghost-btn-sm" type="button"><x-icon name="download" size="13" /> Original</button>
+                                <div class="metric-label">Files</div>
+                                @if ($order->originalFile())
+                                    <button class="ghost-btn ghost-btn-sm" type="button"><x-icon name="download" size="13" /> Original</button>
+                                @endif
                             </div>
-                            <div class="file-row">
-                                <div class="file-mark"><x-icon name="files" size="18" /></div>
-                                <div>
-                                    <div class="mono">{{ strtolower(str_replace(' ', '_', $order->vehicle_label ?? 'file')) }}_{{ $order->reference }}.bin</div>
-                                    <div class="t-mute small mono">{{ $order->file_size ?? '—' }} · md5 {{ $order->md5_status }} · received {{ $order->elapsedLabel() }} ago</div>
+                            @forelse ($order->files as $f)
+                                <div class="file-row">
+                                    <div class="file-mark"><x-icon name="files" size="18" /></div>
+                                    <div>
+                                        <div class="mono">{{ $f->original_name ?? $f->kind.'_'.$order->reference.'.bin' }}</div>
+                                        <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
+                                    </div>
                                 </div>
-                            </div>
+                            @empty
+                                <div class="t-mute small">No files yet.</div>
+                            @endforelse
                             <div class="checksum-row">
                                 <span class="chip chip-sm chip-static">ECU id matches</span>
                                 <span class="chip chip-sm chip-static">checksum ok</span>
                                 <span class="chip chip-sm chip-static">no DTC mods</span>
                             </div>
+
+                            @if ($canUpload && ! $order->tunedFile())
+                                <form wire:submit="uploadTuned" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border)">
+                                    <div class="metric-label" style="margin-bottom:6px">Upload tuned file</div>
+                                    <input type="file" wire:model="tunedUpload" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)" />
+                                    @error('tunedUpload') <div class="auth-hint" style="color:var(--danger); margin-top:4px">{{ $message }}</div> @enderror
+                                    <button type="submit" class="primary-btn primary-btn-sm" style="margin-top:8px" wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="uploadTuned"><x-icon name="check" size="13" /> Submit for review</span>
+                                        <span wire:loading wire:target="uploadTuned">Uploading…</span>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
 
                         <div class="card card-pad" style="margin-top:14px">
@@ -83,13 +120,10 @@
                             <div class="timeline">
                                 @php $events = $order->events; $count = $events->count(); @endphp
                                 @foreach ($events as $i => $e)
-                                    @php $state = $e->state; @endphp
-                                    <div class="tl-row tl-row-{{ $state }}">
+                                    <div class="tl-row tl-row-{{ $e->state }}">
                                         <div class="tl-dot-col">
-                                            <span class="tl-dot tl-dot-{{ $state }}"></span>
-                                            @if ($i < $count - 1)
-                                                <span class="tl-line"></span>
-                                            @endif
+                                            <span class="tl-dot tl-dot-{{ $e->state }}"></span>
+                                            @if ($i < $count - 1) <span class="tl-line"></span> @endif
                                         </div>
                                         <div class="tl-text">
                                             <div class="tl-stage">{{ $e->stage }} <span class="t-mute small">· {{ $e->happened_at?->diffForHumans() }}</span></div>
@@ -134,19 +168,20 @@
                                             {{ $tp?->status ?? 'off' }} · {{ $tp?->workload ?? 0 }}/{{ $tp?->capacity ?? 0 }} workload
                                         </div>
                                     </div>
-                                    <button class="ghost-btn ghost-btn-sm" type="button">Change</button>
                                 </div>
                             @else
-                                <button class="ghost-btn" type="button">+ Auto-assign</button>
+                                <div class="t-mute small">Unassigned.</div>
                             @endif
                         </div>
 
                         <div class="card card-pad" style="margin-top:14px">
                             <div class="card-head"><div class="metric-label">Customer notes</div></div>
-                            <div class="quote">
-                                "Stock car, fresh service. Pump 99 only. Please keep DPF in place — vehicle is MOT'd next week."
-                            </div>
-                            <div class="t-mute small">— {{ $c?->name }}, on upload</div>
+                            @if ($order->customer_note)
+                                <div class="quote">{{ $order->customer_note }}</div>
+                                <div class="t-mute small">— {{ $c?->name }}, on upload</div>
+                            @else
+                                <div class="t-mute small">No notes from the customer.</div>
+                            @endif
                         </div>
                     </div>
                 </div>
