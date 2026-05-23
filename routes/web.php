@@ -17,6 +17,11 @@ Route::get('/dashboard', function () {
 
 Route::view('profile', 'profile')->middleware(['auth'])->name('profile');
 
+Route::post('/logout', function (\App\Livewire\Actions\Logout $logout) {
+    $logout();
+    return redirect('/');
+})->middleware('auth')->name('logout');
+
 /* Customer area */
 Route::middleware(['auth', 'verified', 'role:customer|admin'])
     ->prefix('app')->name('app.')->group(function () {
