@@ -1,0 +1,73 @@
+<div>
+    <div class="crumbs-sm" style="margin-bottom:8px">
+        <a href="{{ route('app.orders.index') }}" style="color:var(--muted); text-decoration:none">Orders</a>
+        <x-icon name="chevron" size="12" />
+        <span class="crumb-active mono">#{{ $order->reference }}</span>
+    </div>
+
+    <div class="page-head" style="margin-bottom:18px">
+        <div>
+            <h1 class="page-title">Order #{{ $order->reference }}</h1>
+            <div class="cust-meta">
+                @include('partials.status-badge', ['status' => $order->status])
+                <span class="mono small t-mute">{{ $order->elapsedLabel() }} elapsed</span>
+            </div>
+        </div>
+        <div class="page-actions">
+            @if ($order->originalFile())
+                <button class="ghost-btn" type="button" wire:click="downloadOriginal"><x-icon name="download" size="13" /> Original</button>
+            @endif
+            @if ($order->tunedFile())
+                <button class="primary-btn" type="button" wire:click="downloadTuned"><x-icon name="download" size="13" /> Tuned file</button>
+            @endif
+        </div>
+    </div>
+
+    <div class="meta-grid">
+        <div class="meta"><div class="metric-label">Vehicle</div><div class="meta-val">{{ $order->vehicle_label }} · {{ $order->vehicle_year }}</div></div>
+        <div class="meta"><div class="metric-label">ECU</div><div class="meta-val mono">{{ $order->ecu_label }}</div></div>
+        <div class="meta"><div class="metric-label">Options</div><div class="meta-val">{{ $order->options_label }}</div></div>
+        <div class="meta"><div class="metric-label">Tuner</div><div class="meta-val">{{ $order->assignedTuner?->name ?? 'auto-assigning…' }}</div></div>
+        <div class="meta"><div class="metric-label">Credits</div><div class="meta-val mono">{{ $order->credits_cost }}</div></div>
+        <div class="meta"><div class="metric-label">SLA</div><div class="meta-val mono">{{ $order->elapsedLabel() }} / {{ $order->sla }}</div></div>
+    </div>
+
+    <div class="drawer-grid" style="margin-top:18px">
+        <div>
+            <div class="card card-pad">
+                <div class="metric-label" style="margin-bottom:12px">Timeline</div>
+                <div class="timeline">
+                    @foreach ($order->events as $i => $e)
+                        <div class="tl-row tl-row-{{ $e->state }}">
+                            <div class="tl-dot-col">
+                                <span class="tl-dot tl-dot-{{ $e->state }}"></span>
+                                @if ($i < $order->events->count() - 1) <span class="tl-line"></span> @endif
+                            </div>
+                            <div class="tl-text">
+                                <div class="tl-stage">{{ $e->stage }} <span class="t-mute small">· {{ $e->happened_at?->diffForHumans() }}</span></div>
+                                <div class="t-mute small">{{ $e->note }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card card-pad">
+                <div class="metric-label" style="margin-bottom:12px">Files</div>
+                @forelse ($order->files as $f)
+                    <div class="file-row">
+                        <div class="file-mark"><x-icon name="files" size="18" /></div>
+                        <div>
+                            <div class="mono">{{ $f->original_name ?? $f->kind.'_'.$order->reference.'.bin' }}</div>
+                            <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="t-mute small">No files yet.</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
