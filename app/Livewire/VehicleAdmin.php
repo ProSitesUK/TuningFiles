@@ -19,10 +19,10 @@ class VehicleAdmin extends Component
     public ?int $variantForm = null;
 
     public array $makeData = [
-        'name' => '', 'logo_url' => '', 'image_url' => '', 'is_active' => true,
+        'name' => '', 'logo_url' => '', 'image_url' => '', 'seo_description' => '', 'intro' => '', 'is_active' => true,
     ];
     public array $modelData = [
-        'name' => '', 'body_type' => '', 'image_url' => '', 'is_active' => true,
+        'name' => '', 'body_type' => '', 'image_url' => '', 'seo_description' => '', 'intro' => '', 'is_active' => true,
     ];
     public array $variantData = [
         'generation' => '', 'year_start' => null, 'year_end' => null,
@@ -41,7 +41,7 @@ class VehicleAdmin extends Component
     {
         $this->makeForm = 0;
         $this->modelForm = $this->variantForm = null;
-        $this->makeData = ['name' => '', 'logo_url' => '', 'image_url' => '', 'is_active' => true];
+        $this->makeData = ['name' => '', 'logo_url' => '', 'image_url' => '', 'seo_description' => '', 'intro' => '', 'is_active' => true];
     }
 
     public function editMake(int $id): void
@@ -50,25 +50,30 @@ class VehicleAdmin extends Component
         $this->makeForm = $id;
         $this->modelForm = $this->variantForm = null;
         $this->makeData = [
-            'name'      => $m->name,
-            'logo_url'  => $m->logo_url ?? '',
-            'image_url' => $m->image_url ?? '',
-            'is_active' => (bool) $m->is_active,
+            'name'            => $m->name,
+            'logo_url'        => $m->logo_url ?? '',
+            'image_url'       => $m->image_url ?? '',
+            'seo_description' => $m->seo_description ?? '',
+            'intro'           => $m->intro ?? '',
+            'is_active'       => (bool) $m->is_active,
         ];
     }
 
     public function saveMake(): void
     {
         $this->validate([
-            'makeData.name' => 'required|string|max:80',
+            'makeData.name'            => 'required|string|max:80',
+            'makeData.seo_description' => 'nullable|string|max:320',
         ]);
 
         $attrs = [
-            'name'      => $this->makeData['name'],
-            'slug'      => Str::slug($this->makeData['name']),
-            'logo_url'  => $this->makeData['logo_url'] ?: null,
-            'image_url' => $this->makeData['image_url'] ?: null,
-            'is_active' => (bool) $this->makeData['is_active'],
+            'name'            => $this->makeData['name'],
+            'slug'            => Str::slug($this->makeData['name']),
+            'logo_url'        => $this->makeData['logo_url'] ?: null,
+            'image_url'       => $this->makeData['image_url'] ?: null,
+            'seo_description' => $this->makeData['seo_description'] ?: null,
+            'intro'           => $this->makeData['intro'] ?: null,
+            'is_active'       => (bool) $this->makeData['is_active'],
         ];
 
         if ($this->makeForm === 0) {
@@ -99,7 +104,7 @@ class VehicleAdmin extends Component
         if (! $this->selectedMakeId) return;
         $this->modelForm = 0;
         $this->makeForm = $this->variantForm = null;
-        $this->modelData = ['name' => '', 'body_type' => '', 'image_url' => '', 'is_active' => true];
+        $this->modelData = ['name' => '', 'body_type' => '', 'image_url' => '', 'seo_description' => '', 'intro' => '', 'is_active' => true];
     }
 
     public function editModel(int $id): void
@@ -108,25 +113,30 @@ class VehicleAdmin extends Component
         $this->modelForm = $id;
         $this->makeForm = $this->variantForm = null;
         $this->modelData = [
-            'name'      => $m->name,
-            'body_type' => $m->body_type ?? '',
-            'image_url' => $m->image_url ?? '',
-            'is_active' => (bool) $m->is_active,
+            'name'            => $m->name,
+            'body_type'       => $m->body_type ?? '',
+            'image_url'       => $m->image_url ?? '',
+            'seo_description' => $m->seo_description ?? '',
+            'intro'           => $m->intro ?? '',
+            'is_active'       => (bool) $m->is_active,
         ];
     }
 
     public function saveModel(): void
     {
         $this->validate([
-            'modelData.name' => 'required|string|max:80',
+            'modelData.name'            => 'required|string|max:80',
+            'modelData.seo_description' => 'nullable|string|max:320',
         ]);
 
         $attrs = [
-            'name'      => $this->modelData['name'],
-            'slug'      => Str::slug($this->modelData['name']),
-            'body_type' => $this->modelData['body_type'] ?: null,
-            'image_url' => $this->modelData['image_url'] ?: null,
-            'is_active' => (bool) $this->modelData['is_active'],
+            'name'            => $this->modelData['name'],
+            'slug'            => Str::slug($this->modelData['name']),
+            'body_type'       => $this->modelData['body_type'] ?: null,
+            'image_url'       => $this->modelData['image_url'] ?: null,
+            'seo_description' => $this->modelData['seo_description'] ?: null,
+            'intro'           => $this->modelData['intro'] ?: null,
+            'is_active'       => (bool) $this->modelData['is_active'],
         ];
 
         if ($this->modelForm === 0) {

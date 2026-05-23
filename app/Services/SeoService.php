@@ -69,13 +69,96 @@ class SeoService
 
     /**
      * Best-effort: detect the current request's "subject" for default SEO.
+     * Returns [type, key, defaults].
      */
     public function currentSubject(): array
     {
-        $routeName = request()->route()?->getName();
-        if ($routeName) {
-            return ['route', $routeName];
+        $route = request()->route();
+        $routeName = $route?->getName() ?? 'unknown';
+
+        $model = $route?->parameter('model');
+        if ($model instanceof \App\Models\VehicleModel) {
+            $make = $route->parameter('make') ?: $model->make;
+            return ['model', (string) $model->id, $this->modelDefaults($make, $model)];
         }
-        return ['route', 'unknown'];
+
+        $make = $route?->parameter('make');
+        if ($make instanceof \App\Models\VehicleMake) {
+            return ['make', (string) $make->id, $this->makeDefaults($make)];
+        }
+
+        return ['route', $routeName, []];
+    }
+
+    private function makeDefaults(\App\Models\VehicleMake $make): array
+    {
+        $title = "{$make->name} Tuning Files & ECU Remaps";
+        $desc = $make->seo_description
+            ?: "Professional {$make->name} tuning files — stage 1, stage 2, custom remaps and DPF / EGR / AdBlue solutions. Vetted tuners, dyno-validated, original retained.";
+
+        return [
+            'title'       => $title,
+            'description' => $desc,
+            'og_image'    => $make->image_url,
+            'structured_data' => [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    [
+                        '@type' => 'BreadcrumbList',
+                        'itemListElement' => [
+                            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',     'item' => route('home')],
+                            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Vehicles', 'item' => route('vehicles')],
+                            ['@type' => 'ListItem', 'position' => 3, 'name' => $make->name],
+                        ],
+                    ],
+                    [
+                        '@type'       => 'CollectionPage',
+                        'name'        => $title,
+                        'description' => $desc,
+                        'url'         => route('vehicles.make', $make),
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function modelDefaults(\App\Models\VehicleMake $make, \App\Models\VehicleModel $model): array
+    {
+        $title = "{$make->name} {$model->name} Tuning Files & Remaps";
+        $desc = $model->seo_description
+            ?: "Professional ECU tuning files for the {$make->name} {$model->name}. Stage 1, stage 2 and custom remaps from a vetted tuner network. Dyno-validated, checksum-correct, original file retained.";
+
+        return [
+            'title'       => $title,
+            'description' => $desc,
+            'og_image'    => $model->image_url ?: $make->image_url,
+            'structured_data' => [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    [
+                        '@type' => 'BreadcrumbList',
+                        'itemListElement' => [
+                            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',     'item' => route('home')],
+                            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Vehicles', 'item' => route('vehicles')],
+                            ['@type' => 'ListItem', 'position' => 3, 'name' => $make->name, 'item' => route('vehicles.make', $make)],
+                            ['@type' => 'ListItem', 'position' => 4, 'name' => $model->name],
+                        ],
+                    ],
+                    [
+                        '@type'       => 'Service',
+                        'name'        => "{$make->name} {$model->name} ECU Remap",
+                        'description' => $desc,
+                        'url'         => route('vehicles.model', [$make, $model]),
+                        'provider'    => [
+                            '@type' => 'Organization',
+                            'name'  => \App\Models\SiteSetting::get('site_name', 'TuningFiles'),
+                            'url'   => url('/'),
+                        ],
+                        'areaServed'  => ['United Kingdom', 'European Union'],
+                        'category'    => 'Automotive tuning',
+                    ],
+                ],
+            ],
+        ];
     }
 }

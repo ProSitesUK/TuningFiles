@@ -18,7 +18,8 @@ class Seo extends Component
         array $defaults = [],
     ) {
         if ($subjectType === null || $subjectKey === null) {
-            [$subjectType, $subjectKey] = $seo->currentSubject();
+            [$subjectType, $subjectKey, $detectedDefaults] = $seo->currentSubject();
+            $defaults = array_merge($detectedDefaults, $defaults);
         }
 
         $this->meta = $seo->resolve($subjectType, $subjectKey, $defaults);

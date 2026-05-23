@@ -23,6 +23,15 @@
                         <span>Hero image URL</span>
                         <input type="text" wire:model.defer="makeData.image_url" placeholder="https://images.unsplash.com/…" />
                     </label>
+                    <label class="va-field">
+                        <span>SEO description <em class="t-mute small">(50–160 chars ideal, 320 max)</em></span>
+                        <textarea wire:model.defer="makeData.seo_description" rows="2" placeholder="Used for meta description and search snippets"></textarea>
+                        @error('makeData.seo_description') <em class="va-err">{{ $message }}</em> @enderror
+                    </label>
+                    <label class="va-field">
+                        <span>Intro copy <em class="t-mute small">(markdown — appears above the model grid on /vehicles/{slug})</em></span>
+                        <textarea wire:model.defer="makeData.intro" rows="5" placeholder="## About {{ '{Make}' }} tuning&#10;&#10;Lorem ipsum…"></textarea>
+                    </label>
                     <label class="va-check">
                         <input type="checkbox" wire:model.defer="makeData.is_active" />
                         <span>Active</span>
@@ -103,6 +112,15 @@
                         <label class="va-field">
                             <span>Image URL</span>
                             <input type="text" wire:model.defer="modelData.image_url" placeholder="https://…" />
+                        </label>
+                        <label class="va-field">
+                            <span>SEO description <em class="t-mute small">(50–160 chars ideal)</em></span>
+                            <textarea wire:model.defer="modelData.seo_description" rows="2"></textarea>
+                            @error('modelData.seo_description') <em class="va-err">{{ $message }}</em> @enderror
+                        </label>
+                        <label class="va-field">
+                            <span>Intro copy <em class="t-mute small">(markdown — appears above the variants table)</em></span>
+                            <textarea wire:model.defer="modelData.intro" rows="5"></textarea>
                         </label>
                         <label class="va-check">
                             <input type="checkbox" wire:model.defer="modelData.is_active" />

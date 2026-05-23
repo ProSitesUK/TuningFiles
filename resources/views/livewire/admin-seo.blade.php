@@ -12,6 +12,13 @@
         </div>
     @endif
 
+    <div class="chips" style="margin-bottom: 14px">
+        @foreach ([['pages', 'Static pages'], ['makes', 'Makes'], ['models', 'Models']] as [$id, $label])
+            <button type="button" wire:click="$set('tab', '{{ $id }}')"
+                    class="chip {{ $tab === $id ? 'chip-active' : '' }}">{{ $label }}</button>
+        @endforeach
+    </div>
+
     <div style="display: grid; gap: 12px; max-width: 920px">
         @foreach ($subjects as $s)
             @php $row = $overrides[$s['type'].':'.$s['key']] ?? null; @endphp

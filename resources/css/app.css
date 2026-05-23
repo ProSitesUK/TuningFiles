@@ -1664,6 +1664,141 @@ input { font: inherit; color: inherit; }
 @media (max-width: 720px)  { .vb-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 460px)  { .vb-grid { grid-template-columns: 1fr; } }
 
+/* --- Make / model landing pages ------------------------------------------- */
+.mk-crumbs {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.mk-crumbs a { color: var(--muted); text-decoration: none; }
+.mk-crumbs a:hover { color: var(--ink); }
+.mk-crumbs .crumb-active { color: var(--ink); font-weight: 500; }
+
+.mk-pagehead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 28px 28px 28px 28px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--surface), var(--bg));
+  position: relative;
+  overflow: hidden;
+}
+.mk-pagehead::before {
+  content: "";
+  position: absolute; top: 0; right: -10%; width: 60%; height: 100%;
+  background: radial-gradient(60% 60% at 70% 50%, var(--accent-soft) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.mk-pagehead-text { position: relative; z-index: 1; min-width: 0; }
+.mk-pagehead-title {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 600; letter-spacing: -0.025em;
+  margin: 0 0 12px; line-height: 1.05;
+  text-wrap: balance;
+}
+.mk-pagehead-sub {
+  font-size: 15px; line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 18px; max-width: 540px;
+}
+.mk-pagehead-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.mk-pagehead-mark {
+  position: relative; z-index: 1;
+  width: 96px; height: 96px;
+  display: grid; place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+}
+.mk-pagehead-mark img { width: 100%; height: 100%; object-fit: contain; }
+
+.mk-pagehead-photo {
+  position: relative; z-index: 1;
+  width: 280px; height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.mk-pagehead-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (max-width: 760px) {
+  .mk-pagehead { grid-template-columns: 1fr; padding: 22px; }
+  .mk-pagehead-photo, .mk-pagehead-mark { display: none; }
+}
+
+/* Markdown prose */
+.mk-prose {
+  max-width: 720px;
+  margin: 0 0 32px;
+  font-size: 15.5px; line-height: 1.65;
+  color: var(--ink-2);
+}
+.mk-prose p { margin: 0 0 14px; }
+.mk-prose h2, .mk-prose h3 {
+  color: var(--ink); margin: 24px 0 10px;
+  font-weight: 600; letter-spacing: -0.015em;
+}
+.mk-prose h2 { font-size: 22px; }
+.mk-prose h3 { font-size: 17px; }
+.mk-prose ul, .mk-prose ol { margin: 0 0 14px; padding-left: 22px; }
+.mk-prose li { margin-bottom: 4px; }
+.mk-prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.mk-prose code {
+  font-family: var(--font-mono); font-size: 13.5px;
+  padding: 1px 6px; border-radius: 4px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+
+.mk-h2 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.015em;
+  margin: 36px 0 14px;
+}
+
+/* Pill row (ECUs) */
+.vb-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.vb-pill {
+  padding: 5px 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* Tune options grid */
+.mk-tunes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.mk-tune {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.mk-tune-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.mk-tune-name { font-size: 14.5px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
+.mk-tune-cost {
+  background: var(--accent-soft); color: var(--accent-ink);
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 11.5px;
+}
+[data-theme="dark"] .mk-tune-cost { color: var(--accent); }
+.mk-tune-desc { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+@media (max-width: 720px) { .mk-tunes-grid { grid-template-columns: 1fr; } }
+
+/* Make card link */
+.vb-card-link { display: flex; flex-direction: column; cursor: pointer; }
+
 /* --- Pricing tiers --------------------------------------------------------- */
 .mk-tiers {
   display: grid;

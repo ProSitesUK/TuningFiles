@@ -5,7 +5,18 @@ use Illuminate\Support\Facades\Route;
 
 /* Marketing */
 Route::view('/', 'marketing.welcome')->name('home');
-Route::view('/vehicles', 'marketing.vehicles')->name('vehicles');
+Route::get('/vehicles', function () {
+    $makes = \App\Models\VehicleMake::where('is_active', true)
+        ->whereHas('models', fn ($q) => $q->where('is_active', true)->whereHas('variants', fn ($qq) => $qq->where('is_active', true)))
+        ->withCount(['models' => fn ($q) => $q->where('is_active', true)])
+        ->orderBy('name')
+        ->get();
+    return view('marketing.vehicles', ['makes' => $makes]);
+})->name('vehicles');
+Route::get('/vehicles/{make:slug}', [\App\Http\Controllers\VehiclePagesController::class, 'showMake'])->name('vehicles.make');
+Route::get('/vehicles/{make:slug}/{model:slug}', [\App\Http\Controllers\VehiclePagesController::class, 'showModel'])
+    ->scopeBindings()
+    ->name('vehicles.model');
 
 /* SEO */
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');

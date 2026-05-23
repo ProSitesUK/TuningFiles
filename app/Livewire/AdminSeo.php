@@ -18,15 +18,41 @@ class AdminSeo extends Component
 
     public ?string $flash = null;
 
+    public string $tab = 'pages';
+
     /**
-     * Known subjects available for editing in phase 1.
-     * Extend this list (or make it dynamic) when per-make/model pages land.
+     * SEO-able subjects, grouped by tab so the page stays scannable
+     * once there are hundreds of make/model entries.
      */
     public function subjects(): array
     {
+        if ($this->tab === 'makes') {
+            return \App\Models\VehicleMake::where('is_active', true)->orderBy('name')->get()
+                ->map(fn ($m) => [
+                    'type'  => 'make',
+                    'key'   => (string) $m->id,
+                    'label' => $m->name,
+                    'path'  => '/vehicles/'.$m->slug,
+                    'hint'  => 'Make landing page · auto-title: "'.$m->name.' Tuning Files & ECU Remaps"',
+                ])->all();
+        }
+        if ($this->tab === 'models') {
+            return \App\Models\VehicleModel::where('is_active', true)
+                ->with('make')
+                ->orderBy('name')
+                ->get()
+                ->map(fn ($m) => [
+                    'type'  => 'model',
+                    'key'   => (string) $m->id,
+                    'label' => $m->make->name.' '.$m->name,
+                    'path'  => '/vehicles/'.$m->make->slug.'/'.$m->slug,
+                    'hint'  => 'Model landing page',
+                ])->all();
+        }
+
         return [
-            ['type' => 'route', 'key' => 'home',     'label' => 'Homepage',          'path' => '/',         'hint' => 'The marketing landing page (/)'],
-            ['type' => 'route', 'key' => 'vehicles', 'label' => 'Vehicles browse',   'path' => '/vehicles', 'hint' => 'Make-first browse at /vehicles'],
+            ['type' => 'route', 'key' => 'home',     'label' => 'Homepage',        'path' => '/',         'hint' => 'The marketing landing page (/)'],
+            ['type' => 'route', 'key' => 'vehicles', 'label' => 'Vehicles browse', 'path' => '/vehicles', 'hint' => 'Make-first browse at /vehicles'],
         ];
     }
 
