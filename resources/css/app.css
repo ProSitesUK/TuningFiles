@@ -1471,6 +1471,105 @@ input { font: inherit; color: inherit; }
 /* --- Vehicle browse (marketing /vehicles page) ----------------------------- */
 .mk-section-narrow { max-width: 1200px; margin: 0 auto; padding: 60px 24px 80px; }
 
+/* Makes landing grid */
+.vb-makes {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+.vb-make-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 22px 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+.vb-make-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(18,16,14,0.08);
+}
+.vb-make-tile-logo {
+  width: 56px; height: 56px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: var(--surface-2);
+  padding: 6px;
+}
+.vb-make-tile-logo img { width: 100%; height: 100%; object-fit: contain; }
+.vb-make-tile-logo .va-logo-fallback { width: 100%; height: 100%; padding: 0; border-radius: 8px; font-size: 14px; }
+.vb-make-tile-name {
+  font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.vb-make-tile-meta { color: var(--muted); }
+
+@media (max-width: 1000px) { .vb-makes { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 720px)  { .vb-makes { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 460px)  { .vb-makes { grid-template-columns: repeat(2, 1fr); } }
+
+/* Make crumb (← All makes) */
+.vb-crumb {
+  background: transparent; border: 0; padding: 0;
+  color: var(--muted); font-size: 11.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.vb-crumb:hover { color: var(--ink); }
+
+/* Horizontal make-icon strip */
+.vb-makestrip {
+  display: flex; gap: 6px;
+  overflow-x: auto; overflow-y: hidden;
+  padding: 8px 4px 14px;
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.vb-makestrip::-webkit-scrollbar { height: 6px; }
+.vb-makestrip::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+.vb-makestrip-cell {
+  flex-shrink: 0;
+  display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 12px;
+  min-width: 72px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+}
+.vb-makestrip-cell:hover { border-color: var(--accent); }
+.vb-makestrip-cell-on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.vb-makestrip-cell img {
+  width: 24px; height: 24px;
+  object-fit: contain;
+}
+.vb-makestrip-fallback {
+  display: inline-grid; place-items: center;
+  width: 24px; height: 24px;
+  background: var(--ink); color: var(--bg);
+  border-radius: 5px;
+  font-size: 9px; font-weight: 600;
+}
+.vb-makestrip-label {
+  font-size: 10.5px; font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.vb-makestrip-all {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  padding: 4px 0;
+}
+
 .vb-filterbar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin-bottom: 28px;

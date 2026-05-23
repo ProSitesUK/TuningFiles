@@ -13,10 +13,23 @@ class VehicleBrowse extends Component
     public string $fuel     = 'all';
     public string $body     = 'all';
 
+    public function selectMake(string $slug): void
+    {
+        $this->makeSlug = $slug;
+        $this->search = '';
+    }
+
+    public function clearMake(): void
+    {
+        $this->makeSlug = 'all';
+        $this->search = '';
+        $this->fuel = 'all';
+        $this->body = 'all';
+    }
+
     public function resetFilters(): void
     {
         $this->search = '';
-        $this->makeSlug = 'all';
         $this->fuel = 'all';
         $this->body = 'all';
     }
@@ -25,8 +38,20 @@ class VehicleBrowse extends Component
     {
         $makes = VehicleMake::where('is_active', true)
             ->whereHas('models', fn ($q) => $q->where('is_active', true))
+            ->withCount(['models' => fn ($q) => $q->where('is_active', true)])
             ->orderBy('name')
             ->get();
+
+        // Makes-first landing view: show grid of make tiles, no model query needed.
+        if ($this->makeSlug === 'all' && $this->search === '' && $this->fuel === 'all' && $this->body === 'all') {
+            return view('livewire.vehicle-browse', [
+                'mode'      => 'makes',
+                'makes'     => $makes,
+                'models'    => collect(),
+                'bodyTypes' => collect(),
+                'selMake'   => null,
+            ]);
+        }
 
         $q = VehicleModel::query()
             ->where('is_active', true)
@@ -65,10 +90,16 @@ class VehicleBrowse extends Component
             ->orderBy('body_type')
             ->pluck('body_type');
 
+        $selMake = $this->makeSlug !== 'all'
+            ? $makes->firstWhere('slug', $this->makeSlug)
+            : null;
+
         return view('livewire.vehicle-browse', [
+            'mode'      => 'models',
             'makes'     => $makes,
             'models'    => $models,
             'bodyTypes' => $bodyTypes,
+            'selMake'   => $selMake,
         ]);
     }
 }
