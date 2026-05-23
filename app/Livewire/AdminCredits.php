@@ -161,10 +161,11 @@ class AdminCredits extends Component
         $searchResults = collect();
         if (strlen($this->adjSearch) >= 2 && ! $this->adjUserId) {
             $needle = $this->adjSearch;
-            $searchResults = User::where(function ($q) use ($needle) {
-                $q->where('name', 'like', "%{$needle}%")
-                  ->orWhere('email', 'like', "%{$needle}%");
-            })->limit(8)->get(['id', 'name', 'email']);
+            $searchResults = User::role('customer')
+                ->where(function ($q) use ($needle) {
+                    $q->where('name', 'like', "%{$needle}%")
+                      ->orWhere('email', 'like', "%{$needle}%");
+                })->limit(8)->get(['id', 'name', 'email']);
         }
 
         return view('livewire.admin-credits', [

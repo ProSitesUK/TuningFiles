@@ -64,8 +64,9 @@
     [$crumbGroup, $crumbLeaf] = $crumbLabels[$route] ?? ['', ''];
 @endphp
 
-<div class="app" data-sb="full">
-    <aside class="sidebar">
+<div class="app" data-sb="full" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+    <div class="sidebar-scrim" :class="sidebarOpen && 'sidebar-scrim-on'" @click="sidebarOpen = false"></div>
+    <aside class="sidebar" :class="sidebarOpen && 'sidebar-open'"
         <div class="sidebar-brand">
             <div class="brand-mark">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -123,6 +124,11 @@
 
     <div class="main">
         <header class="topbar">
+            <button class="admin-hamburger" @click="sidebarOpen = !sidebarOpen" aria-label="Toggle sidebar">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
             <div class="crumbs">
                 <span class="crumb">Admin</span>
                 @if ($crumbGroup)
@@ -137,10 +143,7 @@
                 <span class="sys-pill sys-pill-mute">queue depth <b>{{ $queueTotal }}</b></span>
                 <span class="sys-pill sys-pill-mute">env <b>{{ app()->environment() }}</b></span>
                 <x-theme-toggle />
-                <button class="icon-btn" type="button" title="Notifications">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16 V11 a6 6 0 0 1 12 0 v5 l2 2 H4 z"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>
-                    <span class="bell-dot"></span>
-                </button>
+                <livewire:admin-notifications />
             </div>
         </header>
 

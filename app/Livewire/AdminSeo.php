@@ -120,7 +120,11 @@ class AdminSeo extends Component
 
     public function render()
     {
-        $overrides = SeoMeta::all()->keyBy(fn ($r) => $r->subject_type.':'.$r->subject_key);
+        $type = match ($this->tab) {
+            'makes' => 'make', 'models' => 'model', 'posts' => 'post', default => 'route',
+        };
+        $overrides = SeoMeta::where('subject_type', $type)->get()
+            ->keyBy(fn ($r) => $r->subject_type.':'.$r->subject_key);
 
         return view('livewire.admin-seo', [
             'subjects'  => $this->subjects(),

@@ -109,13 +109,13 @@ class OrderDrawer extends Component
         DB::transaction(function () use ($order) {
             // restore credits
             if ($order->credits_cost > 0 && $order->customer?->customerProfile) {
-                $order->customer->customerProfile->increment('credit_balance', $order->credits_cost);
+                $order->customer?->customerProfile?->increment('credit_balance', $order->credits_cost);
                 CreditTransaction::create([
                     'user_id'       => $order->customer_id,
                     'order_id'      => $order->id,
                     'type'          => 'refund',
                     'credits'       => $order->credits_cost,
-                    'balance_after' => $order->customer->customerProfile->fresh()->credit_balance,
+                    'balance_after' => $order->customer?->customerProfile?->fresh()?->credit_balance ?? 0,
                     'note'          => "Refund for order #{$order->reference}",
                 ]);
             }

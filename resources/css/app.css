@@ -523,7 +523,7 @@ input { font: inherit; color: inherit; }
 .legend-row-sm { font-size: 11.5px; gap: 6px; }
 
 /* â”€â”€â”€ Tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.card-table { overflow: hidden; }
+.card-table { overflow-x: auto; }
 .t {
   width: 100%;
   border-collapse: collapse;
@@ -920,7 +920,7 @@ input { font: inherit; color: inherit; }
 
 .drawer {
   position: fixed; top: 0; right: 0; bottom: 0;
-  width: min(900px, 92vw);
+  width: min(900px, 96vw);
   background: var(--bg);
   border-left: 1px solid var(--border);
   box-shadow: var(--shadow-drawer);
@@ -1061,6 +1061,110 @@ input { font: inherit; color: inherit; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .strip { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* --- Mobile admin (sidebar + three-pane + topbar + spacing) -------------- */
+.admin-hamburger { display: none; }
+.sidebar-scrim { display: none; }
+
+@media (max-width: 768px) {
+  /* App shell: sidebar becomes off-canvas */
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 260px; z-index: 70;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0.32, 1);
+  }
+  .sidebar-open { transform: translateX(0); }
+  .sidebar-scrim {
+    display: block;
+    position: fixed; inset: 0; z-index: 65;
+    background: rgba(18,16,14,0.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .sidebar-scrim-on { opacity: 1; pointer-events: auto; }
+  .sidebar-search kbd { display: none; }
+
+  /* Hamburger in topbar */
+  .admin-hamburger {
+    display: grid; place-items: center;
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer; padding: 0;
+    margin-right: 8px;
+  }
+  .admin-hamburger:hover { background: var(--surface-2); color: var(--ink); }
+
+  /* Topbar: compact, hide pills */
+  .topbar { padding: 8px 16px; }
+  .sys-pill { display: none; }
+
+  /* Page padding */
+  .page { padding: 16px 16px 60px; }
+
+  /* Three-pane: single column */
+  .three-pane {
+    grid-template-columns: 1fr;
+    height: auto; min-height: auto;
+  }
+  .pane { border-right: 0; border-bottom: 1px solid var(--border); min-height: 50vh; }
+  .pane-r { display: none; }
+  .three-pane .pane-m { display: none; }
+  .three-pane.tp-detail .pane-l { display: none; }
+  .three-pane.tp-detail .pane-m { display: flex; }
+
+  /* Tuner rows */
+  .tuner-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 8px; }
+  .tuner-row > *:nth-child(3), .tuner-row > *:nth-child(4) { display: none; }
+
+  /* KPI rows at very small */
+  .va-grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 12px 12px 48px; }
+  .kpi-row { grid-template-columns: 1fr; }
+}
+
+/* Notifications dropdown */
+.notif-wrap { position: relative; }
+.notif-dropdown {
+  position: absolute; top: 100%; right: 0;
+  margin-top: 8px;
+  width: min(380px, 90vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 36px rgba(18,16,14,0.14);
+  z-index: 50;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.notif-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px; font-weight: 600;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.notif-item {
+  display: flex; align-items: start; gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 100ms;
+}
+.notif-item:last-child { border-bottom: 0; }
+.notif-item:hover { background: var(--surface-2); color: var(--ink); }
+.notif-icon { flex-shrink: 0; margin-top: 2px; }
+.notif-text { flex: 1; min-width: 0; }
+.notif-time { color: var(--muted); font-size: 11px; margin-top: 2px; }
+.notif-empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 13px; }
 
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
