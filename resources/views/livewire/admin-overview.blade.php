@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page" wire:poll.30s>
     <div class="page-head">
         <div>
             <h1 class="page-title">Overview</h1>

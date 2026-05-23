@@ -124,6 +124,7 @@
                 <span class="sys-pill"><span class="dot dot-ok"></span> all systems · ok</span>
                 <span class="sys-pill sys-pill-mute">queue depth <b>{{ $queueTotal }}</b></span>
                 <span class="sys-pill sys-pill-mute">env <b>{{ app()->environment() }}</b></span>
+                <x-theme-toggle />
                 <button class="icon-btn" type="button" title="Notifications">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16 V11 a6 6 0 0 1 12 0 v5 l2 2 H4 z"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>
                     <span class="bell-dot"></span>

@@ -7,7 +7,10 @@ use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderFile;
 use App\Models\User;
+use App\Notifications\OrderReady;
+use App\Notifications\OrderRefunded;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -91,6 +94,10 @@ class OrderDrawer extends Component
             'note'        => 'approved by '.auth()->user()->name,
             'happened_at' => now(),
         ]);
+
+        if ($order->customer) {
+            $order->customer->notify(new OrderReady($order));
+        }
     }
 
     public function refund(): void
@@ -123,6 +130,10 @@ class OrderDrawer extends Component
                 'happened_at' => now(),
             ]);
         });
+
+        if ($order->customer) {
+            $order->customer->notify(new OrderRefunded($order));
+        }
     }
 
     public function reassign(): void

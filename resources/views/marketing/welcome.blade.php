@@ -16,6 +16,7 @@
                     <a href="#pricing">Pricing</a>
                 </nav>
                 <div class="mk-nav-actions">
+                    <x-theme-toggle />
                     @auth
                         <a href="{{ route('dashboard') }}" class="primary-btn primary-btn-sm" style="text-decoration:none">Dashboard</a>
                     @else

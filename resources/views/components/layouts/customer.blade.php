@@ -22,6 +22,7 @@
                 </nav>
                 <div class="mk-nav-actions">
                     <span class="t-mute small">{{ auth()->user()->name }}</span>
+                    <x-theme-toggle />
                     <form method="POST" action="{{ route('logout') }}">@csrf
                         <button type="submit" class="ghost-btn ghost-btn-sm">Sign out</button>
                     </form>
