@@ -6,6 +6,12 @@
         </div>
     </div>
 
+    @if (session('status'))
+        <div class="card card-pad" style="background:var(--success-soft); border-color:transparent; margin-bottom:18px; color:var(--success)">
+            {{ session('status') }}
+        </div>
+    @endif
+
     <div class="card card-pad" style="margin-bottom:18px">
         <div class="metric-label">Current balance</div>
         <div class="metric-big">{{ $balance }} <span class="t-mute small" style="font-size:14px; font-family:var(--font-sans)">credits</span></div>
@@ -21,9 +27,12 @@
                     <div class="mk-tier-price"><span class="mk-tier-num">{{ $p->priceFormatted() }}</span></div>
                     <p class="mk-tier-blurb">{{ $p->credits }} credits · roughly {{ floor($p->credits / 32) }} Stage 1 tunes</p>
                 </div>
-                <button type="button" class="{{ $p->slug === 'trade' ? 'primary-btn primary-btn-lg' : 'ghost-btn ghost-btn-lg' }}">
-                    Buy {{ $p->name }} (Phase 12)
-                </button>
+                <form method="POST" action="{{ route('app.checkout.start', $p) }}">
+                    @csrf
+                    <button type="submit" class="{{ $p->slug === 'trade' ? 'primary-btn primary-btn-lg' : 'ghost-btn ghost-btn-lg' }}" style="width:100%; justify-content:center">
+                        Buy {{ $p->name }}
+                    </button>
+                </form>
             </div>
         @endforeach
     </div>

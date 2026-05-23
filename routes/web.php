@@ -33,6 +33,8 @@ Route::middleware(['auth', 'verified', 'role:customer|admin'])
             return view('app.orders.show', ['order' => $order]);
         })->name('orders.show');
         Route::view('/credits', 'app.credits')->name('credits');
+        Route::post('/checkout/{pack}', [\App\Http\Controllers\CheckoutController::class, 'start'])->name('checkout.start');
+        Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
     });
 
 /* Admin / Operations / Tuner area */
