@@ -66,7 +66,7 @@
 
 <div class="app" data-sb="full" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
     <div class="sidebar-scrim" :class="sidebarOpen && 'sidebar-scrim-on'" @click="sidebarOpen = false"></div>
-    <aside class="sidebar" :class="sidebarOpen && 'sidebar-open'"
+    <aside class="sidebar" :class="sidebarOpen && 'sidebar-open'">
         <div class="sidebar-brand">
             <div class="brand-mark">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
