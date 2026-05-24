@@ -87,12 +87,17 @@
                                 @endif
                             </div>
                             @forelse ($order->files as $f)
-                                <div class="file-row">
-                                    <div class="file-mark"><x-icon name="files" size="18" /></div>
-                                    <div>
-                                        <div class="mono">{{ $f->original_name ?? $f->kind.'_'.$order->reference.'.bin' }}</div>
-                                        <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
+                                <div class="file-row" style="display:flex; align-items:center; justify-content:space-between">
+                                    <div style="display:flex; align-items:center; gap:10px">
+                                        <div class="file-mark"><x-icon name="files" size="18" /></div>
+                                        <div>
+                                            <div class="mono">{{ $f->original_name ?? $f->kind.'_'.$order->reference.'.bin' }}</div>
+                                            <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
+                                        </div>
                                     </div>
+                                    @if ($isAdmin || $isTuner)
+                                        <button type="button" class="ghost-btn ghost-btn-sm" wire:click="downloadFile({{ $f->id }})"><x-icon name="download" size="13" /> Download</button>
+                                    @endif
                                 </div>
                             @empty
                                 <div class="t-mute small">No files yet.</div>

@@ -113,6 +113,8 @@ class OrderCreationTest extends TestCase
 
     public function test_order_rejected_with_insufficient_credits(): void
     {
+        \App\Models\SiteSetting::put('pay_per_file_enabled', 'false');
+
         $user = $this->makeCustomer(10);
         $data = $this->createVehicleAndEcu();
 
@@ -123,6 +125,7 @@ class OrderCreationTest extends TestCase
             ->set('vehicleId', $data['vehicle']->id)
             ->set('ecuId', $data['ecu']->id)
             ->set('tuneSlugs', ['stage_1'])
+            ->set('paymentMethod', 'credits')
             ->set('upload', UploadedFile::fake()->create('test.bin', 1024))
             ->call('submit')
             ->assertHasErrors('upload');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Referral;
 use App\Models\ResellerProfile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -21,14 +22,25 @@ new #[Layout('layouts.guest')] class extends Component
     public bool $agreed = true;
     public string $ref = '';
     public ?string $refBusinessName = null;
+    public ?int $referrerUserId = null;
 
     public function mount(): void
     {
         $this->ref = (string) request()->query('ref', '');
 
         if ($this->ref) {
+            // First try reseller profile slug
             $rp = ResellerProfile::where('slug', $this->ref)->where('is_active', true)->first();
             $this->refBusinessName = $rp?->business_name;
+
+            // If not a reseller, try user referral code
+            if (! $rp) {
+                $referrer = User::where('referral_code', $this->ref)->first();
+                if ($referrer) {
+                    $this->referrerUserId = $referrer->id;
+                    $this->refBusinessName = $referrer->name . ' (referral)';
+                }
+            }
         }
     }
 
@@ -67,6 +79,15 @@ new #[Layout('layouts.guest')] class extends Component
             if ($rp && $rp->canAddCustomer()) {
                 $user->update(['reseller_id' => $rp->user_id]);
             }
+        }
+
+        // Create referral record if referred by a user
+        if ($this->referrerUserId) {
+            Referral::create([
+                'referrer_id' => $this->referrerUserId,
+                'referred_id' => $user->id,
+                'status'      => 'pending',
+            ]);
         }
 
         event(new Registered($user));

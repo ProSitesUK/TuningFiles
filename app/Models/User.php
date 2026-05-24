@@ -11,15 +11,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'status', 'reseller_id'])]
+#[Fillable(['name', 'email', 'password', 'status', 'reseller_id', 'referral_code'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, Billable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->referral_code)) {
+                $user->referral_code = Str::random(8);
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -39,6 +49,8 @@ class User extends Authenticatable
     public function creditTransactions(): HasMany { return $this->hasMany(CreditTransaction::class); }
     public function invoices(): HasMany            { return $this->hasMany(Invoice::class); }
     public function tickets(): HasMany            { return $this->hasMany(Ticket::class, 'customer_id'); }
+    public function referralsMade(): HasMany       { return $this->hasMany(Referral::class, 'referrer_id'); }
+    public function referredBy(): HasOne           { return $this->hasOne(Referral::class, 'referred_id'); }
 
     public function isAdmin(): bool      { return $this->hasAnyRole(['admin', 'operations']); }
     public function isTuner(): bool      { return $this->hasRole('tuner'); }
@@ -57,6 +69,11 @@ class User extends Authenticatable
     public function creditBalance(): int
     {
         return (int) ($this->customerProfile?->credit_balance ?? 0);
+    }
+
+    public function referralUrl(): string
+    {
+        return url('/register?ref=' . $this->referral_code);
     }
 
     public function isOnline(): bool  { return $this->status === 'online'; }

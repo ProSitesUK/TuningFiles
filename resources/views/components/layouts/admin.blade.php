@@ -37,6 +37,7 @@
         ]],
         ['heading' => 'Content', 'items' => [
             ['id' => 'admin.blog', 'label' => 'Blog', 'icon' => 'reports'],
+            ['id' => 'admin.dyno-results', 'label' => 'Dyno results', 'icon' => 'reports'],
         ]],
         ['heading' => 'System', 'items' => [
             ['id' => 'admin.seo',      'label' => 'SEO',      'icon' => 'reports'],
@@ -57,7 +58,8 @@
         'admin.revenue'   => ['Business', 'Revenue'],
         'admin.credits'   => ['Business', 'Credits'],
         'admin.reports'   => ['Business', 'Reports'],
-        'admin.blog'      => ['Content',  'Blog'],
+        'admin.blog'          => ['Content',  'Blog'],
+        'admin.dyno-results'  => ['Content',  'Dyno results'],
         'admin.seo'       => ['System',   'SEO'],
         'admin.settings'  => ['System',   'Settings'],
     ];

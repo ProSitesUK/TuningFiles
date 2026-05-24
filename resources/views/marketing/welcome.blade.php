@@ -92,6 +92,8 @@
                         <em>62</em> countries
                         <span class="mk-trust-sep"></span>
                         <em>£3.4M</em> processed / mo
+                        <span class="mk-trust-sep"></span>
+                        <em>30-day</em> guarantee
                     </span>
                 </div>
             </div>

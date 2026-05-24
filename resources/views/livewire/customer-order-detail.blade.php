@@ -71,6 +71,100 @@
         </div>
     </div>
 
+    {{-- Guarantee section --}}
+    @if (in_array($order->status, ['ready', 'delivered']))
+        <div class="card card-pad" style="margin-top:18px">
+            @if ($order->guarantee_claimed_at)
+                <div style="display:flex; align-items:center; gap:8px">
+                    <span class="chip chip-sm chip-static" style="background:var(--warning-soft); color:var(--warning)">Guarantee claimed</span>
+                    <span class="t-mute small">on {{ $order->guarantee_claimed_at->format('j M Y') }}</span>
+                </div>
+            @elseif ($order->underGuarantee())
+                @php $daysRemaining = (int) now()->diffInDays($order->guarantee_expires_at, false); @endphp
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px">
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <span class="chip chip-sm chip-static" style="background:var(--success-soft); color:var(--success)">{{ \App\Models\SiteSetting::get('guarantee_days', '30') }}-day guarantee</span>
+                        <span class="t-mute small">{{ $daysRemaining }} {{ $daysRemaining === 1 ? 'day' : 'days' }} remaining</span>
+                    </div>
+                    <button type="button" class="ghost-btn ghost-btn-sm" wire:click="$toggle('showGuaranteeForm')">Claim guarantee</button>
+                </div>
+                @if ($showGuaranteeForm)
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border)">
+                        <label class="va-field">
+                            <span>Reason for claiming guarantee</span>
+                            <textarea wire:model="guaranteeReason" rows="3" placeholder="Describe the issue with the tuned file..." style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:13px"></textarea>
+                        </label>
+                        <div style="display:flex; gap:8px; margin-top:8px">
+                            <button type="button" class="primary-btn primary-btn-sm" wire:click="claimGuarantee(guaranteeReason)" wire:confirm="This will refund {{ $order->credits_cost }} credits to your balance. Continue?">Submit claim</button>
+                            <button type="button" class="ghost-btn ghost-btn-sm" wire:click="$set('showGuaranteeForm', false)">Cancel</button>
+                        </div>
+                    </div>
+                @endif
+            @elseif ($order->guarantee_expires_at && $order->guarantee_expires_at->isPast())
+                <div style="display:flex; align-items:center; gap:8px">
+                    <span class="chip chip-sm chip-static" style="background:var(--surface-2); color:var(--muted)">Guarantee expired</span>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- Revision window --}}
+    @if ($order->status === 'delivered')
+        @if ($order->underRevisionWindow())
+            <div class="card card-pad" style="margin-top:16px; border-color:var(--accent)">
+                <div class="metric-label">Revision window</div>
+                <p class="t-mute small">{{ $order->revision_window_ends_at->diffForHumans() }} remaining · revision {{ $order->revision_count }} of {{ $order->max_revisions }}</p>
+                <form wire:submit="requestRevision" style="margin-top:10px">
+                    <textarea wire:model="revisionNotes" rows="3" placeholder="Describe what you'd like changed..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg); color:var(--ink); font-family:inherit; font-size:13px"></textarea>
+                    @error('revisionNotes') <em class="va-err">{{ $message }}</em> @enderror
+                    @error('revision') <em class="va-err">{{ $message }}</em> @enderror
+                    <button type="submit" class="primary-btn primary-btn-sm" style="margin-top:8px">Request revision</button>
+                </form>
+            </div>
+        @elseif ($order->revision_window_ends_at)
+            <div class="t-mute small" style="margin-top:12px">Revision window closed {{ $order->revision_window_ends_at->diffForHumans() }}.</div>
+        @endif
+    @endif
+
+    {{-- Dyno results submission --}}
+    @if ($order->status === 'delivered')
+        <div class="card card-pad" style="margin-top:16px">
+            <div class="metric-label">Share your dyno results</div>
+            <p class="t-mute small">Upload your results and earn 5 bonus credits.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
+                <label class="va-field">
+                    <span class="t-mute small">Stock HP</span>
+                    <input type="number" wire:model="dynoStockHp" placeholder="e.g. 150" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg); color:var(--ink); font-size:13px" />
+                    @error('dynoStockHp') <em class="va-err">{{ $message }}</em> @enderror
+                </label>
+                <label class="va-field">
+                    <span class="t-mute small">Tuned HP</span>
+                    <input type="number" wire:model="dynoTunedHp" placeholder="e.g. 190" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg); color:var(--ink); font-size:13px" />
+                    @error('dynoTunedHp') <em class="va-err">{{ $message }}</em> @enderror
+                </label>
+            </div>
+            <label class="va-field" style="margin-top:8px">
+                <span class="t-mute small">Tune type</span>
+                <select wire:model="dynoTuneType" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg); color:var(--ink); font-size:13px">
+                    <option value="">Select tune type...</option>
+                    <option value="Stage 1">Stage 1</option>
+                    <option value="Stage 2">Stage 2</option>
+                    <option value="Stage 3">Stage 3</option>
+                    <option value="Custom">Custom</option>
+                    <option value="Eco">Eco</option>
+                    <option value="DPF/EGR">DPF/EGR</option>
+                </select>
+                @error('dynoTuneType') <em class="va-err">{{ $message }}</em> @enderror
+            </label>
+            <label class="va-field" style="margin-top:8px">
+                <span class="t-mute small">Notes (optional)</span>
+                <textarea wire:model="dynoNotes" rows="2" placeholder="Any notes about your dyno run..." style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg); color:var(--ink); font-family:inherit; font-size:13px"></textarea>
+                @error('dynoNotes') <em class="va-err">{{ $message }}</em> @enderror
+            </label>
+            <button type="button" wire:click="submitDynoResult" class="primary-btn primary-btn-sm" style="margin-top:8px">Submit results</button>
+        </div>
+    @endif
+
     <div style="margin-top:18px">
         <a href="{{ route('app.tickets.new', ['order' => $order->id]) }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">Need help with this order?</a>
     </div>

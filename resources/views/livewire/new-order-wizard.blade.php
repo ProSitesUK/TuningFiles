@@ -121,6 +121,36 @@
                     </div>
                 </div>
 
+                @if ($payPerFileEnabled)
+                    <div style="margin-top:16px">
+                        <div class="metric-label" style="margin-bottom:8px">Payment method</div>
+                        <div class="auth-plans" style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                            <button type="button" wire:click="$set('paymentMethod', 'credits')"
+                                    class="auth-plan {{ $paymentMethod === 'credits' ? 'auth-plan-on' : '' }}" {{ $balance < $totalCost ? 'disabled' : '' }}>
+                                <div class="auth-plan-head">
+                                    <span>Pay with credits</span>
+                                    <span class="auth-plan-price mono">{{ $totalCost }} cr</span>
+                                </div>
+                                <div class="auth-plan-sub small">
+                                    @if ($balance >= $totalCost)
+                                        Balance: {{ $balance }} cr
+                                    @else
+                                        Insufficient balance ({{ $balance }} cr)
+                                    @endif
+                                </div>
+                            </button>
+                            <button type="button" wire:click="$set('paymentMethod', 'pay_now')"
+                                    class="auth-plan {{ $paymentMethod === 'pay_now' ? 'auth-plan-on' : '' }}">
+                                <div class="auth-plan-head">
+                                    <span>Pay now</span>
+                                    <span class="auth-plan-price mono">&pound;{{ $pricePounds }}</span>
+                                </div>
+                                <div class="auth-plan-sub small">Card payment via Stripe</div>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
                 <div style="display:flex; gap:8px; margin-top:18px">
                     <button type="button" wire:click="back" class="ghost-btn ghost-btn-lg">← Back</button>
                     <button type="submit" class="primary-btn primary-btn-lg" wire:loading.attr="disabled">

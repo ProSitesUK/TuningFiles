@@ -22,6 +22,8 @@ class Order extends Model
         'queued_at' => 'datetime', 'assigned_at' => 'datetime', 'started_at' => 'datetime',
         'review_at' => 'datetime', 'ready_at' => 'datetime', 'delivered_at' => 'datetime',
         'refunded_at' => 'datetime', 'sla_due_at' => 'datetime',
+        'guarantee_expires_at' => 'datetime', 'guarantee_claimed_at' => 'datetime',
+        'revision_window_ends_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo      { return $this->belongsTo(User::class, 'customer_id'); }
@@ -56,5 +58,21 @@ class Order extends Model
     {
         $start = $this->queued_at ?? $this->created_at;
         return $start ? (int) $start->diffInMinutes(now(), absolute: true) : 0;
+    }
+
+    public function underGuarantee(): bool
+    {
+        return $this->status === 'delivered'
+            && $this->guarantee_expires_at
+            && $this->guarantee_expires_at->isFuture()
+            && ! $this->guarantee_claimed_at;
+    }
+
+    public function underRevisionWindow(): bool
+    {
+        return $this->status === 'delivered'
+            && $this->revision_window_ends_at
+            && $this->revision_window_ends_at->isFuture()
+            && $this->revision_count < $this->max_revisions;
     }
 }

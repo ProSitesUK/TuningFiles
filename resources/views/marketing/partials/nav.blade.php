@@ -11,6 +11,7 @@
         <nav class="mk-nav-links">
             <a href="{{ route('home') }}#how">How it works</a>
             <a href="{{ route('vehicles') }}">Supported</a>
+            <a href="{{ route('results') }}">Results</a>
             <a href="{{ route('home') }}#pricing">Pricing</a>
             <a href="{{ route('blog.index') }}">Blog</a>
             <a href="{{ route('home') }}#tuners">For tuners</a>
@@ -47,6 +48,7 @@
         <nav class="mk-mobile-links">
             <a href="{{ route('home') }}#how" @click="mobileOpen = false">How it works</a>
             <a href="{{ route('vehicles') }}" @click="mobileOpen = false">Supported</a>
+            <a href="{{ route('results') }}" @click="mobileOpen = false">Results</a>
             <a href="{{ route('home') }}#pricing" @click="mobileOpen = false">Pricing</a>
             <a href="{{ route('blog.index') }}" @click="mobileOpen = false">Blog</a>
             <a href="{{ route('home') }}#tuners" @click="mobileOpen = false">For tuners</a>

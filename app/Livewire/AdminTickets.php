@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Models\User;
+use App\Notifications\TicketReply;
 use Livewire\Component;
 
 class AdminTickets extends Component
@@ -37,6 +38,10 @@ class AdminTickets extends Component
 
         if (! $ticket->assigned_to_id) {
             $ticket->update(['assigned_to_id' => auth()->id()]);
+        }
+
+        if (!$this->internal && $ticket->customer) {
+            $ticket->customer->notify(new TicketReply($ticket));
         }
 
         $ticket->touch();

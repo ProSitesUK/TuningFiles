@@ -2,14 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Models\CreditTransaction;
 use App\Models\Ecu;
 use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderFile;
+use App\Models\SiteSetting;
 use App\Models\Tune;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Notifications\OrderQueued;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -28,6 +31,7 @@ class NewOrderWizard extends Component
     /** @var array<string> */
     public array  $tuneSlugs = [];
     public string $note      = '';
+    public string $paymentMethod = 'credits';
 
     #[Validate('required|file|max:10240')] // 10MB max
     public $upload = null;
@@ -90,9 +94,15 @@ class NewOrderWizard extends Component
         $cost    = (int) $tunes->sum('credit_cost');
 
         $balance = (int) ($user->customerProfile?->credit_balance ?? 0);
-        if ($balance < $cost) {
-            $this->addError('upload', "Not enough credits (need {$cost}, you have {$balance}). Buy more first.");
-            return;
+        $payPerFileEnabled = SiteSetting::get('pay_per_file_enabled', 'true') === 'true';
+
+        if ($this->paymentMethod === 'credits' && $balance < $cost) {
+            if ($payPerFileEnabled) {
+                $this->paymentMethod = 'pay_now';
+            } else {
+                $this->addError('upload', "Not enough credits (need {$cost}, you have {$balance}). Buy more first.");
+                return;
+            }
         }
 
         $next = (int) (Order::max('reference') ?? 4000) + 1;
@@ -150,12 +160,54 @@ class NewOrderWizard extends Component
             'happened_at' => now(),
         ]);
 
-        // deduct credits
-        if ($user->customerProfile) {
-            $user->customerProfile->decrement('credit_balance', $cost);
-        }
+        if ($this->paymentMethod === 'credits') {
+            // Deduct credits (existing flow)
+            if ($user->customerProfile) {
+                $user->customerProfile->decrement('credit_balance', $cost);
+            }
 
-        $this->redirect(route('app.orders.show', $order), navigate: true);
+            $user->notify(new OrderQueued($order));
+
+            $this->redirect(route('app.orders.show', $order), navigate: true);
+        } else {
+            // Pay-per-file: calculate GBP cost in pennies
+            $creditRatePennies = (int) SiteSetting::get('credit_rate_pennies', '100');
+            $amountPennies = $cost * $creditRatePennies;
+
+            CreditTransaction::create([
+                'user_id'        => $user->id,
+                'order_id'       => $order->id,
+                'type'           => 'spend',
+                'credits'        => -$cost,
+                'balance_after'  => $balance,
+                'amount_pennies' => $amountPennies,
+                'payment_method' => 'stripe',
+                'payment_status' => config('cashier.secret') ? 'pending' : 'completed',
+                'note'           => "Pay-per-file for order #{$order->reference}",
+            ]);
+
+            $user->notify(new OrderQueued($order));
+
+            // Dev mode: no Stripe configured -- mark completed immediately
+            if (! config('cashier.secret')) {
+                $this->redirect(route('app.orders.show', $order), navigate: true);
+                return;
+            }
+
+            // Production: redirect to Stripe checkout
+            $checkout = $user->checkoutCharge(
+                $amountPennies,
+                "Tune order #{$order->reference}",
+                1,
+                [
+                    'success_url' => route('app.orders.show', $order),
+                    'cancel_url'  => route('app.orders.show', $order),
+                    'metadata'    => ['order_id' => $order->id, 'user_id' => $user->id],
+                ]
+            );
+
+            $this->redirect($checkout->url, navigate: false);
+        }
     }
 
     public function render()
@@ -177,6 +229,11 @@ class NewOrderWizard extends Component
                 ->orderBy('year_start', 'desc')->get()
             : collect();
 
+        $totalCost = (int) Tune::whereIn('slug', $this->tuneSlugs)->sum('credit_cost');
+        $balance   = (int) (auth()->user()->customerProfile?->credit_balance ?? 0);
+        $creditRatePennies = (int) SiteSetting::get('credit_rate_pennies', '100');
+        $payPerFileEnabled = SiteSetting::get('pay_per_file_enabled', 'true') === 'true';
+
         return view('livewire.new-order-wizard', [
             'makes'    => $makes,
             'models'   => $models,
@@ -184,9 +241,11 @@ class NewOrderWizard extends Component
             'ecus'     => $this->vehicleId
                 ? Vehicle::find($this->vehicleId)?->ecus()->get() ?? collect()
                 : collect(),
-            'tunes'    => Tune::where('is_active', true)->get(),
-            'totalCost' => Tune::whereIn('slug', $this->tuneSlugs)->sum('credit_cost'),
-            'balance'   => (int) (auth()->user()->customerProfile?->credit_balance ?? 0),
+            'tunes'         => Tune::where('is_active', true)->get(),
+            'totalCost'     => $totalCost,
+            'balance'       => $balance,
+            'payPerFileEnabled' => $payPerFileEnabled,
+            'pricePounds'   => number_format(($totalCost * $creditRatePennies) / 100, 2),
         ]);
     }
 }

@@ -46,6 +46,20 @@
         </div>
     </div>
 
+    {{-- Refer a friend --}}
+    @if (\App\Models\SiteSetting::get('referral_enabled', 'false') === 'true')
+        <div class="card card-pad" style="margin-bottom:18px">
+            <div class="card-head">
+                <div class="metric-label">Refer a workshop</div>
+            </div>
+            <p class="t-mute small" style="margin-bottom:8px">Share your link — both you and your friend get {{ \App\Models\SiteSetting::get('referral_credits_referrer', '10') }} free credits when they place their first order.</p>
+            <div style="display:flex; gap:8px">
+                <input type="text" readonly value="{{ auth()->user()->referralUrl() }}" style="flex:1; padding:7px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); font-size:12px; font-family:var(--font-mono)" />
+                <button type="button" onclick="navigator.clipboard.writeText('{{ auth()->user()->referralUrl() }}')" class="ghost-btn ghost-btn-sm">Copy</button>
+            </div>
+        </div>
+    @endif
+
     {{-- Recent orders --}}
     <div class="card card-table">
         <div class="card-head card-pad-x">

@@ -3,12 +3,16 @@
 namespace App\Livewire;
 
 use App\Models\CreditTransaction;
+use App\Models\DownloadLog;
 use App\Models\Order;
 use App\Models\OrderEvent;
 use App\Models\OrderFile;
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Notifications\OrderReady;
 use App\Notifications\OrderRefunded;
+use App\Notifications\TunerAssigned;
+use App\Services\ReferralService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\On;
@@ -85,7 +89,16 @@ class OrderDrawer extends Component
         $order = $this->getOrderProperty();
         if (! $order) return;
 
-        $order->update(['status' => 'ready', 'ready_at' => now()]);
+        $guaranteeDays = (int) SiteSetting::get('guarantee_days', '30');
+        $revisionHours = (int) SiteSetting::get('revision_window_hours', '24');
+        $maxRevisions = (int) SiteSetting::get('max_free_revisions', '1');
+        $order->update([
+            'status' => 'ready',
+            'ready_at' => now(),
+            'guarantee_expires_at' => now()->addDays($guaranteeDays),
+            'revision_window_ends_at' => now()->addHours($revisionHours),
+            'max_revisions' => $maxRevisions,
+        ]);
         OrderEvent::create([
             'order_id'    => $order->id,
             'actor_id'    => auth()->id(),
@@ -98,6 +111,9 @@ class OrderDrawer extends Component
         if ($order->customer) {
             $order->customer->notify(new OrderReady($order));
         }
+
+        // Credit referral on first delivered order
+        ReferralService::creditReferral($order);
     }
 
     public function refund(): void
@@ -174,7 +190,28 @@ class OrderDrawer extends Component
             'note'        => 'reassigned to '.$tuner->name,
             'happened_at' => now(),
         ]);
+
+        if ($order->customer) {
+            $order->customer->notify(new TunerAssigned($order->fresh()));
+        }
+
         $this->reassignTo = null;
+    }
+
+    public function downloadFile(int $fileId)
+    {
+        abort_unless(auth()->user()->isAdmin() || auth()->user()->isTuner(), 403);
+        $file = OrderFile::findOrFail($fileId);
+
+        DownloadLog::create([
+            'order_file_id' => $file->id,
+            'user_id'       => auth()->id(),
+            'ip_address'    => request()->ip(),
+            'user_agent'    => request()->userAgent(),
+            'downloaded_at' => now(),
+        ]);
+
+        return response()->download(storage_path('app/private/' . $file->path), $file->original_name);
     }
 
     public function render()

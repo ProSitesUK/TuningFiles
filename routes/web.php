@@ -20,6 +20,7 @@ Route::get('/vehicles/{make:slug}/{model:slug}', [\App\Http\Controllers\VehicleP
 
 Route::get('/blog',          [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+Route::get('/results', [\App\Http\Controllers\DynoResultsController::class, 'index'])->name('results');
 
 /* SEO */
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
@@ -78,6 +79,7 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/credits',   'admin.credits')->name('credits');
         Route::view('/reports',   'admin.reports')->name('reports');
         Route::view('/blog',      'admin.blog')->name('blog');
+        Route::view('/dyno-results', 'admin.dyno-results')->name('dyno-results');
         Route::view('/seo',       'admin.seo')->name('seo');
         Route::view('/settings',  'admin.settings')->name('settings');
     });

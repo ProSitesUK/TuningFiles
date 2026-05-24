@@ -119,6 +119,75 @@
             @error('form.gateway_invoice_company') <em class="va-err">{{ $message }}</em> @enderror
         </label>
 
+        <div class="va-form-title" style="margin-top:18px">Guarantees & Revisions</div>
+        <p class="t-mute small" style="margin-bottom:10px">Configure the credit-back guarantee window for delivered orders.</p>
+        <div class="va-grid-2">
+            <label class="va-field">
+                <span>Guarantee period (days)</span>
+                <input type="number" wire:model.defer="form.guarantee_days" min="1" max="365" />
+                @error('form.guarantee_days') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">Customers can claim a credit refund within this window after delivery.</em>
+            </label>
+        </div>
+        <div class="va-grid-2" style="margin-top:14px">
+            <label class="va-field">
+                <span>Revision window (hours)</span>
+                <input type="number" wire:model.defer="form.revision_window_hours" min="1" max="720" />
+                @error('form.revision_window_hours') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">Hours after delivery during which a customer can request a free revision.</em>
+            </label>
+            <label class="va-field">
+                <span>Max free revisions</span>
+                <input type="number" wire:model.defer="form.max_free_revisions" min="0" max="10" />
+                @error('form.max_free_revisions') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">Maximum number of free revisions per order.</em>
+            </label>
+        </div>
+
+        <div class="va-form-title" style="margin-top:18px">Pay-per-file</div>
+        <p class="t-mute small" style="margin-bottom:10px">Allow customers to pay per file with Stripe instead of using credits.</p>
+        <div class="va-grid-2">
+            <label class="va-field">
+                <span>Pay-per-file enabled</span>
+                <select wire:model.defer="form.pay_per_file_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </label>
+            <label class="va-field">
+                <span>Credit rate (pennies per credit)</span>
+                <input type="number" wire:model.defer="form.credit_rate_pennies" min="1" max="100000" />
+                @error('form.credit_rate_pennies') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">1 credit = this many pennies. Default 100 = &pound;1 per credit.</em>
+            </label>
+        </div>
+
+        <div class="va-form-title" style="margin-top:18px">Referral program</div>
+        <p class="t-mute small" style="margin-bottom:10px">Reward customers for referring new workshops.</p>
+        <div class="va-grid-2" style="margin-bottom:14px">
+            <label class="va-field">
+                <span>Referral program</span>
+                <select wire:model.defer="form.referral_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </label>
+        </div>
+        <div class="va-grid-2">
+            <label class="va-field">
+                <span>Credits for referrer</span>
+                <input type="number" wire:model.defer="form.referral_credits_referrer" min="0" max="1000" />
+                @error('form.referral_credits_referrer') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">Credits awarded to the person who referred.</em>
+            </label>
+            <label class="va-field">
+                <span>Credits for referred</span>
+                <input type="number" wire:model.defer="form.referral_credits_referred" min="0" max="1000" />
+                @error('form.referral_credits_referred') <em class="va-err">{{ $message }}</em> @enderror
+                <em class="t-mute small">Credits awarded to the new customer.</em>
+            </label>
+        </div>
+
         <div class="va-form-actions" style="margin-top: 18px">
             <button type="submit" class="primary-btn primary-btn-lg" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="save">Save settings</span>

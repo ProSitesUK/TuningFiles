@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OrderReady extends Notification
+class TunerAssigned extends Notification
 {
     use Queueable;
 
@@ -18,21 +18,23 @@ class OrderReady extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $o = $this->order;
+        $tunerName = $o->assignedTuner?->name ?? 'a tuner';
         return (new MailMessage)
-            ->subject("Order #{$o->reference} is ready")
+            ->subject("A tuner is working on #{$o->reference}")
             ->greeting("Hi {$notifiable->name},")
-            ->line("Your tuned file for {$o->vehicle_label} ({$o->options_label}) is ready to download.")
-            ->action('Download tuned file', route('app.orders.show', $o))
-            ->line('Revisions are free for 30 days — just reply to this email if you need anything tweaked.');
+            ->line("{$tunerName} has been assigned to your order #{$o->reference} ({$o->vehicle_label}). Estimated delivery within {$o->sla}.")
+            ->action('View order', route('app.orders.show', $o))
+            ->line('We\'ll notify you as soon as your tuned file is ready.');
     }
 
     public function toDatabase(object $notifiable): array
     {
         $o = $this->order;
+        $tunerName = $o->assignedTuner?->name ?? 'A tuner';
         return [
-            'message' => "Order #{$o->reference} is ready",
+            'message' => "Tuner {$tunerName} assigned to #{$o->reference}",
             'url'     => route('app.orders.show', $o),
-            'icon'    => 'queue',
+            'icon'    => 'tuners',
         ];
     }
 }

@@ -13,7 +13,7 @@ class OrderRefunded extends Notification
 
     public function __construct(public Order $order) {}
 
-    public function via(object $notifiable): array { return ['mail']; }
+    public function via(object $notifiable): array { return ['mail', 'database']; }
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -25,5 +25,15 @@ class OrderRefunded extends Notification
             ->line("We have restored {$o->credits_cost} credits to your account.")
             ->action('See your credits', route('app.credits'))
             ->line('Sorry we could not get this one right — replies welcome.');
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        $o = $this->order;
+        return [
+            'message' => "Order #{$o->reference} refunded",
+            'url'     => route('app.credits'),
+            'icon'    => 'credits',
+        ];
     }
 }
