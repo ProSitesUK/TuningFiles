@@ -132,20 +132,20 @@ class AdminCredits extends Component
         $user = User::findOrFail($this->adjUserId);
         $credits = (int) $this->adjCredits;
 
+        // Update customer profile balance
+        $profile = $user->customerProfile
+            ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro', 'credit_balance' => 0]);
+        $profile->increment('credit_balance', $credits);
+
         // Create credit transaction
         CreditTransaction::create([
             'user_id'        => $user->id,
             'type'           => 'adjust',
             'credits'        => $credits,
+            'balance_after'  => $profile->credit_balance,
             'amount_pennies' => 0,
             'note'           => trim($this->adjNote),
         ]);
-
-        // Update customer profile balance
-        $profile = $user->customerProfile;
-        if ($profile) {
-            $profile->increment('credit_balance', $credits);
-        }
 
         $this->flash = "Adjustment of {$credits} credits applied to {$user->name}.";
         $this->adjUserId = null;
@@ -170,7 +170,7 @@ class AdminCredits extends Component
 
             // Grant credits
             $profile = $tx->user->customerProfile
-                ?? CustomerProfile::create(['user_id' => $tx->user_id, 'plan' => 'Pro']);
+                ?? CustomerProfile::create(['user_id' => $tx->user_id, 'plan' => 'Pro', 'credit_balance' => 0]);
 
             $profile->increment('credit_balance', $tx->credits);
             $profile->increment('total_spent_pennies', $tx->amount_pennies ?? 0);

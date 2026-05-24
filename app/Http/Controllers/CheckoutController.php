@@ -58,7 +58,7 @@ class CheckoutController extends Controller
     {
         DB::transaction(function () use ($user, $pack, $stripeRef) {
             $profile = $user->customerProfile
-                ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro']);
+                ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro', 'credit_balance' => 0]);
 
             $profile->increment('credit_balance', $pack->credits);
             $profile->increment('total_spent_pennies', $pack->price_pennies);

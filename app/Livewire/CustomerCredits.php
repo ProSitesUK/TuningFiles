@@ -62,7 +62,7 @@ class CustomerCredits extends Component
         $reference = 'TF-' . $user->id . '-' . $pack->id;
 
         $profile = $user->customerProfile
-            ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro']);
+            ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro', 'credit_balance' => 0]);
 
         CreditTransaction::create([
             'user_id'        => $user->id,
@@ -98,7 +98,7 @@ class CustomerCredits extends Component
 
         DB::transaction(function () use ($user, $pack, $days) {
             $profile = $user->customerProfile
-                ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro']);
+                ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro', 'credit_balance' => 0]);
 
             $invoice = Invoice::create([
                 'user_id'       => $user->id,

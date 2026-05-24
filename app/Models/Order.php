@@ -46,7 +46,7 @@ class Order extends Model
     {
         $start = $this->queued_at ?? $this->created_at;
         if (! $start) return '—';
-        $mins = (int) now()->diffInMinutes($start);
+        $mins = (int) $start->diffInMinutes(now(), absolute: true);
         if ($mins < 60) return "{$mins}m";
         $h = intdiv($mins, 60); $m = $mins % 60;
         return sprintf('%dh %02dm', $h, $m);
@@ -55,6 +55,6 @@ class Order extends Model
     public function ageMin(): int
     {
         $start = $this->queued_at ?? $this->created_at;
-        return $start ? (int) now()->diffInMinutes($start) : 0;
+        return $start ? (int) $start->diffInMinutes(now(), absolute: true) : 0;
     }
 }

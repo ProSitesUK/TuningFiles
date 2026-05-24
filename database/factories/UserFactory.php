@@ -42,4 +42,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user belongs to a reseller.
+     */
+    public function reseller(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'reseller_id' => User::factory(),
+        ]);
+    }
 }
