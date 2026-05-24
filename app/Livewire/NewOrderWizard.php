@@ -103,6 +103,7 @@ class NewOrderWizard extends Component
         $order = Order::create([
             'reference'      => (string) $next,
             'customer_id'    => $user->id,
+            'reseller_id'    => $user->reseller_id,
             'vehicle_id'     => $vehicle?->id,
             'ecu_id'         => $ecu?->id,
             'status'         => 'queued',

@@ -26,6 +26,7 @@ class Order extends Model
 
     public function customer(): BelongsTo      { return $this->belongsTo(User::class, 'customer_id'); }
     public function assignedTuner(): BelongsTo { return $this->belongsTo(User::class, 'assigned_tuner_id'); }
+    public function reseller(): BelongsTo      { return $this->belongsTo(User::class, 'reseller_id'); }
     public function vehicle(): BelongsTo       { return $this->belongsTo(Vehicle::class); }
     public function ecu(): BelongsTo           { return $this->belongsTo(Ecu::class); }
     public function files(): HasMany           { return $this->hasMany(OrderFile::class); }

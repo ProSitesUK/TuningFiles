@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ResellerProfile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,18 @@ new #[Layout('layouts.guest')] class extends Component
     public string $plan = 'Pro';
     public string $country = 'United Kingdom';
     public bool $agreed = true;
+    public string $ref = '';
+    public ?string $refBusinessName = null;
+
+    public function mount(): void
+    {
+        $this->ref = (string) request()->query('ref', '');
+
+        if ($this->ref) {
+            $rp = ResellerProfile::where('slug', $this->ref)->where('is_active', true)->first();
+            $this->refBusinessName = $rp?->business_name;
+        }
+    }
 
     public function next(): void
     {
@@ -48,6 +61,14 @@ new #[Layout('layouts.guest')] class extends Component
         ]);
         $user->syncRoles(['customer']);
 
+        // Link to reseller if ref param was provided
+        if ($this->ref) {
+            $rp = ResellerProfile::where('slug', $this->ref)->where('is_active', true)->first();
+            if ($rp && $rp->canAddCustomer()) {
+                $user->update(['reseller_id' => $rp->user_id]);
+            }
+        }
+
         event(new Registered($user));
         Auth::login($user);
         $this->redirect(route('dashboard', absolute: false), navigate: true);
@@ -57,6 +78,13 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <h1 class="auth-title">Open a workshop account</h1>
     <p class="auth-sub">Step {{ $step }} of 2 · takes about a minute.</p>
+
+    @if ($refBusinessName)
+        <div class="reseller-badge" style="margin-bottom:16px">
+            <span class="badge-dot" style="background:var(--accent)"></span>
+            <span>Joining via {{ $refBusinessName }}</span>
+        </div>
+    @endif
 
     <div class="auth-steps">
         <span class="auth-step {{ $step >= 1 ? 'auth-step-on' : '' }}"></span>

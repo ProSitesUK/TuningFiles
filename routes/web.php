@@ -29,9 +29,9 @@ Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'rob
 Route::get('/dashboard', function () {
     $u = Auth::user();
     if (! $u) return redirect()->route('login');
-    return $u->isAdmin() || $u->isTuner()
-        ? redirect()->route('admin.live')
-        : redirect()->route('app.dashboard');
+    if ($u->isAdmin() || $u->isTuner()) return redirect()->route('admin.live');
+    if ($u->isReseller()) return redirect()->route('reseller.dashboard');
+    return redirect()->route('app.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::view('profile', 'profile')->middleware(['auth'])->name('profile');
@@ -80,6 +80,16 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/blog',      'admin.blog')->name('blog');
         Route::view('/seo',       'admin.seo')->name('seo');
         Route::view('/settings',  'admin.settings')->name('settings');
+    });
+
+/* Reseller area */
+Route::middleware(['auth', 'verified', 'role:reseller'])
+    ->prefix('reseller')->name('reseller.')->group(function () {
+        Route::view('/',          'reseller.dashboard')->name('dashboard');
+        Route::view('/customers', 'reseller.customers')->name('customers');
+        Route::view('/customers/invite', 'reseller.invite')->name('invite');
+        Route::view('/orders',    'reseller.orders')->name('orders');
+        Route::view('/settings',  'reseller.settings')->name('settings');
     });
 
 require __DIR__.'/auth.php';

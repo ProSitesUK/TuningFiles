@@ -2366,3 +2366,19 @@ input { font: inherit; color: inherit; }
 .chat-reply textarea:focus { border-color: var(--accent); }
 .chat-msg-internal { border: 1px dashed var(--warn); background: var(--warn-soft); opacity: 0.85; }
 
+/* --- Reseller badge (customer dashboard / registration) -------------------- */
+.reseller-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px; color: var(--ink-2);
+  background: var(--surface);
+  margin-top: 6px;
+}
+.reseller-badge-logo {
+  width: 18px; height: 18px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+

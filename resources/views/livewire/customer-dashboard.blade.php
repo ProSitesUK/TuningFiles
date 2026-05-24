@@ -3,6 +3,17 @@
         <div>
             <h1 class="page-title">Welcome back, {{ explode(' ', $user->name)[0] }}</h1>
             <p class="page-sub">Pick up where you left off — or upload a new file.</p>
+            @if (auth()->user()->hasReseller())
+                @php $rp = auth()->user()->reseller?->resellerProfile; @endphp
+                @if ($rp)
+                    <div class="reseller-badge">
+                        @if ($rp->logo_url)
+                            <img src="{{ $rp->logo_url }}" alt="{{ $rp->business_name }}" class="reseller-badge-logo" />
+                        @endif
+                        <span>Managed by {{ $rp->business_name }}</span>
+                    </div>
+                @endif
+            @endif
         </div>
         <div class="page-actions">
             @php $ss = \App\Models\User::supportStatus(); @endphp
