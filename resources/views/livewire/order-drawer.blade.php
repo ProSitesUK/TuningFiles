@@ -40,10 +40,14 @@
                     </div>
                     @if ($isAdmin)
                         <div class="drawer-actions">
+                            <select wire:change="changeStatus($event.target.value)" style="padding:5px 8px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:12px; color:var(--ink)">
+                                @foreach (\App\Models\Order::STATUSES as $s)
+                                    <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
+                                @endforeach
+                            </select>
                             <button class="ghost-btn ghost-btn-sm" type="button" @click="reassignOpen = !reassignOpen">Reassign</button>
                             <button class="ghost-btn ghost-btn-sm" type="button" wire:click="refund" wire:confirm="Refund this order and restore credits to the customer?"><x-icon name="refund" size="13" /> Refund</button>
                             <button class="ghost-btn ghost-btn-sm ghost-btn-accent" type="button" wire:click="markReady" wire:confirm="Mark this order ready for delivery?"><x-icon name="check" size="13" /> Mark ready</button>
-                            <button class="primary-btn primary-btn-sm" type="button"><x-icon name="flag" size="13" /> Flag dispute</button>
                         </div>
                     @endif
                 </div>
@@ -99,7 +103,7 @@
                                 <span class="chip chip-sm chip-static">no DTC mods</span>
                             </div>
 
-                            @if ($canUpload && ! $order->tunedFile())
+                            @if ($canUpload)
                                 <form wire:submit="uploadTuned" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border)">
                                     <div class="metric-label" style="margin-bottom:6px">Upload tuned file</div>
                                     <input type="file" wire:model="tunedUpload" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)" />

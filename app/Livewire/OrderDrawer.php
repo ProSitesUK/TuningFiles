@@ -136,6 +136,26 @@ class OrderDrawer extends Component
         }
     }
 
+    public function changeStatus(string $status): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+        $order = $this->getOrderProperty();
+        if (! $order) return;
+        if (! in_array($status, Order::STATUSES, true)) return;
+
+        $from = $order->status;
+        $order->update(['status' => $status]);
+
+        OrderEvent::create([
+            'order_id'    => $order->id,
+            'actor_id'    => auth()->id(),
+            'stage'       => "status changed",
+            'state'       => 'done',
+            'note'        => "{$from} → {$status} by ".auth()->user()->name,
+            'happened_at' => now(),
+        ]);
+    }
+
     public function reassign(): void
     {
         abort_unless(auth()->user()->isAdmin(), 403);
