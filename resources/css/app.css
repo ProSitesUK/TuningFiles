@@ -1138,6 +1138,17 @@ input { font: inherit; color: inherit; }
   .tuner-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 8px; }
   .tuner-row > *:nth-child(3), .tuner-row > *:nth-child(4) { display: none; }
 
+  /* Overview page: prevent horizontal scroll */
+  .main { overflow-x: hidden; }
+  .page-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .seg { flex-wrap: wrap; }
+  .seg-vs { display: none; }
+  .grid-2, .grid-2-7-5 { grid-template-columns: 1fr; }
+  .donut-row { flex-direction: column; align-items: flex-start; }
+  .donut-wrap { align-self: center; }
+  .card-head { flex-wrap: wrap; gap: 8px; }
+  .card-head-r { flex-wrap: wrap; }
+
   /* KPI rows at very small */
   .va-grid-2 { grid-template-columns: 1fr; }
 }
