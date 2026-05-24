@@ -48,8 +48,8 @@ class CustomersScreen extends Component
 
         $customers = $q->orderByDesc('orders_count')->get();
 
-        if ($customers->isNotEmpty() && (! $this->selected || $customers->whereStrict('id', $this->selected)->isEmpty())) {
-            $this->selected = $customers->first()->id;
+        if ($this->selected && $customers->whereStrict('id', $this->selected)->isEmpty()) {
+            $this->selected = null;
         }
 
         $sel = $this->selected
