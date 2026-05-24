@@ -1092,7 +1092,12 @@ input { font: inherit; color: inherit; }
     transition: opacity 0.25s;
   }
   .sidebar-scrim-on { opacity: 1; pointer-events: auto; }
-  .sidebar-search kbd { display: none; }
+  .sidebar-search { display: none; }
+  .sidebar-brand { padding: 14px 14px 10px; }
+  .sidebar-group { margin-bottom: 8px; }
+  .sidebar-group-label { padding: 4px 8px 2px; font-size: 9.5px; }
+  .sidebar-item { padding: 6px 8px; font-size: 12.5px; gap: 8px; }
+  .sidebar-user { padding: 10px 14px; }
 
   /* Hamburger in topbar */
   .admin-hamburger {
@@ -2354,17 +2359,30 @@ input { font: inherit; color: inherit; }
 }
 
 /* â”€â”€â”€ Sign out chip on dashboard sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.sidebar-user { position: relative; }
+.sidebar-user {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-user-link {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 0;
+}
 .sidebar-user-text { flex: 1; min-width: 0; }
-.signout-btn {
-  width: 22px; height: 22px;
-  border: 0; background: transparent;
+.sidebar-user-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.sidebar-action-btn {
+  width: 30px; height: 30px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   display: grid; place-items: center;
   color: var(--muted);
-  border-radius: 5px;
-  cursor: default;
+  border-radius: var(--r-sm);
+  cursor: pointer;
 }
-.signout-btn:hover { background: var(--surface-2); color: var(--ink); }
+.sidebar-action-btn:hover { background: var(--ink); color: var(--bg); }
+.sidebar-action-logout:hover { background: var(--danger); color: #fff; }
 
 /* Ticket thread chat bubbles */
 .chat-thread { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
