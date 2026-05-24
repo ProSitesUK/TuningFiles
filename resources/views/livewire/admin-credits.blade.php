@@ -107,7 +107,117 @@
         </div>
     @endif
 
-    {{-- Section B: Manual credit adjustment --}}
+    {{-- Section B: Pending payments --}}
+    @php
+        $allPending = collect();
+
+        // Add pending transactions (bank transfers)
+        foreach ($pendingTransactions as $pt) {
+            $allPending->push((object) [
+                'id'       => $pt->id,
+                'source'   => 'transaction',
+                'name'     => $pt->user?->name ?? 'Unknown',
+                'email'    => $pt->user?->email ?? '',
+                'method'   => $pt->payment_method ?? 'bank',
+                'credits'  => $pt->credits,
+                'amount'   => $pt->amount_pennies ? '£' . number_format($pt->amount_pennies / 100, 2) : '—',
+                'date'     => $pt->created_at,
+                'status'   => $pt->payment_status,
+            ]);
+        }
+
+        // Add pending invoices that don't already have a matching pending transaction
+        foreach ($pendingInvoices as $pi) {
+            $hasTx = $pendingTransactions->where('user_id', $pi->user_id)
+                ->where('payment_method', 'invoice')
+                ->where('credits', $pi->credits)
+                ->isNotEmpty();
+            if (! $hasTx) {
+                $allPending->push((object) [
+                    'id'       => $pi->id,
+                    'source'   => 'invoice',
+                    'name'     => $pi->user?->name ?? 'Unknown',
+                    'email'    => $pi->user?->email ?? '',
+                    'method'   => 'invoice',
+                    'credits'  => $pi->credits,
+                    'amount'   => '£' . number_format($pi->amount_pennies / 100, 2),
+                    'date'     => $pi->created_at,
+                    'status'   => $pi->status,
+                ]);
+            }
+        }
+    @endphp
+
+    <div class="card card-table" style="margin-bottom: 24px">
+        <div class="card-head card-pad-x">
+            <div class="metric-label">Pending payments</div>
+            <span class="t-mute small">{{ $allPending->count() }} awaiting action</span>
+        </div>
+        <table class="t">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Method</th>
+                    <th class="num">Credits</th>
+                    <th class="num">Amount</th>
+                    <th>Requested</th>
+                    <th>Status</th>
+                    <th style="width:160px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($allPending as $p)
+                    <tr class="t-row">
+                        <td>
+                            <div><strong>{{ $p->name }}</strong></div>
+                            <div class="t-mute small">{{ $p->email }}</div>
+                        </td>
+                        <td>
+                            @if ($p->method === 'bank')
+                                <span class="badge badge-blue">bank transfer</span>
+                            @elseif ($p->method === 'invoice')
+                                <span class="badge badge-purple">invoice</span>
+                            @else
+                                <span class="badge badge-neutral">{{ $p->method }}</span>
+                            @endif
+                        </td>
+                        <td class="num mono">{{ number_format($p->credits) }}</td>
+                        <td class="num mono">{{ $p->amount }}</td>
+                        <td class="mono small">{{ $p->date?->diffForHumans() }}</td>
+                        <td>
+                            @if ($p->status === 'pending' || $p->status === 'sent')
+                                <span class="badge badge-warning">pending</span>
+                            @elseif ($p->status === 'overdue')
+                                <span class="badge badge-danger">overdue</span>
+                            @else
+                                <span class="badge badge-neutral">{{ $p->status }}</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($p->source === 'transaction')
+                                <div style="display:inline-flex; gap:4px">
+                                    <button type="button" wire:click="approvePending({{ $p->id }})"
+                                            wire:confirm="Approve this payment and grant {{ $p->credits }} credits?"
+                                            class="primary-btn primary-btn-sm">Approve</button>
+                                    <button type="button" wire:click="rejectPending({{ $p->id }})"
+                                            wire:confirm="Reject this payment?"
+                                            class="ghost-btn ghost-btn-sm" style="color:var(--danger)">Reject</button>
+                                </div>
+                            @else
+                                <span class="t-mute small">Awaiting payment</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="empty-cell">No pending payments. All clear.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- Section C: Manual credit adjustment --}}
     <div class="card card-pad" style="max-width: 640px">
         <div class="va-form-title">Manual credit adjustment</div>
         <p class="t-mute small" style="margin-bottom: 14px">Search for a customer, then apply a positive or negative credit adjustment. This creates an audit record.</p>

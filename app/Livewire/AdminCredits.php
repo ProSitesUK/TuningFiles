@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Models\CreditPack;
 use App\Models\CreditTransaction;
 use App\Models\CustomerProfile;
+use App\Models\Invoice;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class AdminCredits extends Component
@@ -153,6 +155,67 @@ class AdminCredits extends Component
         $this->adjSearch = '';
     }
 
+    /* ---- Pending payment approval / rejection ---- */
+    public function approvePending(int $transactionId): void
+    {
+        $tx = CreditTransaction::findOrFail($transactionId);
+
+        if ($tx->payment_status !== 'pending') {
+            $this->flash = 'Transaction is no longer pending.';
+            return;
+        }
+
+        DB::transaction(function () use ($tx) {
+            $tx->update(['payment_status' => 'completed']);
+
+            // Grant credits
+            $profile = $tx->user->customerProfile
+                ?? CustomerProfile::create(['user_id' => $tx->user_id, 'plan' => 'Pro']);
+
+            $profile->increment('credit_balance', $tx->credits);
+            $profile->increment('total_spent_pennies', $tx->amount_pennies ?? 0);
+
+            // Update balance_after on the transaction
+            $tx->update(['balance_after' => $profile->credit_balance]);
+
+            // If this came from an invoice, mark the invoice as paid
+            if ($tx->payment_method === 'invoice') {
+                Invoice::where('user_id', $tx->user_id)
+                    ->where('credits', $tx->credits)
+                    ->whereIn('status', ['sent', 'draft'])
+                    ->latest()
+                    ->first()
+                    ?->update(['status' => 'paid', 'paid_at' => now()]);
+            }
+        });
+
+        $this->flash = "Payment approved — {$tx->credits} credits granted to {$tx->user->name}.";
+    }
+
+    public function rejectPending(int $transactionId): void
+    {
+        $tx = CreditTransaction::findOrFail($transactionId);
+
+        if ($tx->payment_status !== 'pending') {
+            $this->flash = 'Transaction is no longer pending.';
+            return;
+        }
+
+        $tx->update(['payment_status' => 'failed']);
+
+        // If from invoice, cancel the invoice
+        if ($tx->payment_method === 'invoice') {
+            Invoice::where('user_id', $tx->user_id)
+                ->where('credits', $tx->credits)
+                ->whereIn('status', ['sent', 'draft'])
+                ->latest()
+                ->first()
+                ?->update(['status' => 'cancelled']);
+        }
+
+        $this->flash = "Payment rejected for {$tx->user->name}.";
+    }
+
     public function render()
     {
         $packs = CreditPack::orderByDesc('is_active')->orderBy('credits')->get();
@@ -168,9 +231,22 @@ class AdminCredits extends Component
                 })->limit(8)->get(['id', 'name', 'email']);
         }
 
+        // Pending payments: bank transfers + invoices awaiting approval
+        $pendingTransactions = CreditTransaction::where('payment_status', 'pending')
+            ->with('user:id,name,email')
+            ->latest()
+            ->get();
+
+        $pendingInvoices = Invoice::whereIn('status', ['sent', 'overdue'])
+            ->with('user:id,name,email')
+            ->latest()
+            ->get();
+
         return view('livewire.admin-credits', [
-            'packs'         => $packs,
-            'searchResults' => $searchResults,
+            'packs'               => $packs,
+            'searchResults'       => $searchResults,
+            'pendingTransactions' => $pendingTransactions,
+            'pendingInvoices'     => $pendingInvoices,
         ]);
     }
 }

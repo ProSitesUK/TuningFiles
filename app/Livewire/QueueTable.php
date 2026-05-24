@@ -2,8 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\CreditTransaction;
+use App\Models\Dispute;
 use App\Models\Order;
-use App\Support\Charts;
+use App\Models\TunerProfile;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -48,16 +50,88 @@ class QueueTable extends Component
 
         $orders = $q->orderByDesc('reference')->paginate(15);
 
+        // ── KPI values ──────────────────────────────────────────
+        $ordersToday = Order::whereDate('created_at', today())->count();
+
+        $revenueTodayPennies = CreditTransaction::where('type', 'purchase')
+            ->whereDate('created_at', today())
+            ->sum('amount_pennies');
+        $revenueToday = '£' . number_format($revenueTodayPennies / 100, 0);
+
+        $avgTurnaround = (int) Order::where('status', 'delivered')
+            ->whereNotNull('queued_at')
+            ->whereNotNull('delivered_at')
+            ->selectRaw('AVG((julianday(delivered_at) - julianday(queued_at)) * 1440) as avg_mins')
+            ->value('avg_mins');
+        $avgTurnaroundLabel = $avgTurnaround < 60
+            ? "{$avgTurnaround}m"
+            : intdiv($avgTurnaround, 60) . 'h ' . ($avgTurnaround % 60) . 'm';
+
+        $activeTuners = TunerProfile::where('status', 'live')->count();
+        $totalTuners  = TunerProfile::count();
+        $idleTuners   = $totalTuners - $activeTuners;
+
+        $openDisputes = Dispute::where('status', 'open')->count();
+
+        // ── 14-day sparkline series (real data) ─────────────────
+        $dateFrom = now()->subDays(13)->startOfDay();
+        $orderSpark = collect(range(0, 13))->map(function ($i) use ($dateFrom) {
+            $day = $dateFrom->copy()->addDays($i);
+            return Order::whereDate('created_at', $day)->count();
+        })->all();
+
+        $revenueSpark = collect(range(0, 13))->map(function ($i) use ($dateFrom) {
+            $day = $dateFrom->copy()->addDays($i);
+            return round(CreditTransaction::where('type', 'purchase')
+                ->whereDate('created_at', $day)
+                ->sum('amount_pennies') / 100, 2);
+        })->all();
+
+        $turnaroundSpark = collect(range(0, 13))->map(function ($i) use ($dateFrom) {
+            $day = $dateFrom->copy()->addDays($i);
+            return (int) (Order::where('status', 'delivered')
+                ->whereNotNull('queued_at')
+                ->whereNotNull('delivered_at')
+                ->whereDate('delivered_at', $day)
+                ->selectRaw('AVG((julianday(delivered_at) - julianday(queued_at)) * 1440) as avg_mins')
+                ->value('avg_mins') ?? 0);
+        })->all();
+
+        $queueSpark = collect(range(0, 13))->map(function ($i) use ($dateFrom) {
+            $day = $dateFrom->copy()->addDays($i);
+            return Order::whereDate('created_at', '<=', $day)
+                ->whereIn('status', ['queued', 'in_progress', 'review'])
+                ->count();
+        })->all();
+
+        $tunersSpark = collect(range(0, 13))->map(fn () => $activeTuners)->all();
+
+        $disputesSpark = collect(range(0, 13))->map(function ($i) use ($dateFrom) {
+            $day = $dateFrom->copy()->addDays($i);
+            return Dispute::where('status', 'open')
+                ->whereDate('created_at', '<=', $day)
+                ->count();
+        })->all();
+
         return view('livewire.queue-table', [
             'orders'  => $orders,
             'counts'  => $counts,
+            // KPI headline values
+            'ordersToday'         => $ordersToday,
+            'revenueToday'        => $revenueToday,
+            'avgTurnaroundLabel'  => $avgTurnaroundLabel,
+            'activeTuners'        => $activeTuners,
+            'totalTuners'         => $totalTuners,
+            'idleTuners'          => $idleTuners,
+            'openDisputes'        => $openDisputes,
+            // sparkline series
             'charts'  => [
-                'orders'     => Charts::ORDERS_14D,
-                'revenue'    => Charts::REVENUE_14D,
-                'turnaround' => Charts::TURNAROUND_14D,
-                'queue'      => Charts::QUEUE_14D,
-                'tuners'     => Charts::TUNERS_14D,
-                'disputes'   => Charts::DISPUTES_14D,
+                'orders'     => $orderSpark,
+                'revenue'    => $revenueSpark,
+                'turnaround' => $turnaroundSpark,
+                'queue'      => $queueSpark,
+                'tuners'     => $tunersSpark,
+                'disputes'   => $disputesSpark,
             ],
         ]);
     }

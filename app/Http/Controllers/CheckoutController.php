@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CreditPack;
 use App\Models\CreditTransaction;
+use App\Models\CustomerProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -56,16 +57,18 @@ class CheckoutController extends Controller
     private function devGrant($user, CreditPack $pack, ?string $stripeRef = null): void
     {
         DB::transaction(function () use ($user, $pack, $stripeRef) {
-            $profile = $user->customerProfile;
-            $profile?->increment('credit_balance', $pack->credits);
-            $profile?->increment('total_spent_pennies', $pack->price_pennies);
+            $profile = $user->customerProfile
+                ?? CustomerProfile::create(['user_id' => $user->id, 'plan' => 'Pro']);
+
+            $profile->increment('credit_balance', $pack->credits);
+            $profile->increment('total_spent_pennies', $pack->price_pennies);
 
             CreditTransaction::create([
                 'user_id'               => $user->id,
                 'credit_pack_id'        => $pack->id,
                 'type'                  => 'purchase',
                 'credits'               => $pack->credits,
-                'balance_after'         => (int) ($profile?->credit_balance ?? 0),
+                'balance_after'         => $profile->credit_balance,
                 'amount_pennies'        => $pack->price_pennies,
                 'stripe_payment_intent' => $stripeRef,
                 'note'                  => "Credit pack: {$pack->name}",

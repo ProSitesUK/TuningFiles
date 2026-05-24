@@ -68,6 +68,57 @@
             </label>
         </div>
 
+        <div class="va-form-title" style="margin-top:18px">Payment methods</div>
+        <p class="t-mute small" style="margin-bottom:10px">Enable or disable payment gateways available to customers when purchasing credit packs.</p>
+
+        <div class="va-grid-2" style="margin-bottom:14px">
+            <label class="va-field">
+                <span>Stripe (card payments)</span>
+                <select wire:model.defer="form.gateway_stripe_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </label>
+            <label class="va-field">
+                <span>Bank transfer</span>
+                <select wire:model.defer="form.gateway_bank_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </label>
+        </div>
+
+        <label class="va-field">
+            <span>Bank account details <em class="t-mute small">(shown to customer when they choose bank transfer)</em></span>
+            <textarea wire:model.defer="form.gateway_bank_details" rows="4" placeholder="Account name: TuningFiles Ltd&#10;Sort code: 12-34-56&#10;Account number: 12345678&#10;Reference: use your TF-xxx reference"></textarea>
+            @error('form.gateway_bank_details') <em class="va-err">{{ $message }}</em> @enderror
+        </label>
+
+        <div class="va-grid-2" style="margin-top:14px">
+            <label class="va-field">
+                <span>Invoice payments</span>
+                <select wire:model.defer="form.gateway_invoice_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+                <em class="t-mute small">Only customers with "can invoice" flag will see this option.</em>
+            </label>
+            <label class="va-field">
+                <span>Default invoice terms</span>
+                <select wire:model.defer="form.gateway_invoice_terms">
+                    <option value="net_7">Net 7</option>
+                    <option value="net_14">Net 14</option>
+                    <option value="net_30">Net 30</option>
+                    <option value="net_60">Net 60</option>
+                </select>
+            </label>
+        </div>
+        <label class="va-field" style="margin-top:8px">
+            <span>Invoice company details <em class="t-mute small">(appears on invoice header)</em></span>
+            <textarea wire:model.defer="form.gateway_invoice_company" rows="4" placeholder="TuningFiles Ltd&#10;123 Tuning Street&#10;Bristol BS1 1AA&#10;VAT: GB123456789"></textarea>
+            @error('form.gateway_invoice_company') <em class="va-err">{{ $message }}</em> @enderror
+        </label>
+
         <div class="va-form-actions" style="margin-top: 18px">
             <button type="submit" class="primary-btn primary-btn-lg" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="save">Save settings</span>

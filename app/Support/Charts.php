@@ -4,11 +4,7 @@ namespace App\Support;
 
 /**
  * Sparkline / chart series for the dashboard.
-<<<<<<< HEAD
  * Mirrors the prototype's data.js arrays so screens look identical out of the box.
-=======
- * Mirrors the prototype's data.js arrays so the screens look identical out of the box.
->>>>>>> phase-7-queue-table
  * Once real reporting exists, swap these for live queries.
  */
 class Charts

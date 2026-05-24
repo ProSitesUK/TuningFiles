@@ -16,12 +16,12 @@
     <div class="kpi-row kpi-row-tight">
         @php
             $kpis = [
-                ['Orders / 24h',   '142',    '+18% wow',   'up',   $charts['orders'],     'var(--accent)', false],
-                ['Revenue / 24h',  '£3,840', '+12%',       'up',   $charts['revenue'],    'var(--ink)',    false],
-                ['Avg turnaround', '14m',    '−3m',        'up',   $charts['turnaround'], 'var(--ink)',    false],
-                ['Queue depth',    (string)$counts['all'], '2 critical', 'warn', $charts['queue'], 'var(--ink)', false],
-                ['Active tuners',  '6 / 12', '2 idle',     'warn', $charts['tuners'],     'var(--ink)',    false],
-                ['Disputes open',  '3',      '1 overdue',  'warn', $charts['disputes'],   'var(--ink)',    false],
+                ['Orders / 24h',   (string) $ordersToday,                          '',  'up',   $charts['orders'],     'var(--accent)', false],
+                ['Revenue / 24h',  $revenueToday,                                  '',  'up',   $charts['revenue'],    'var(--ink)',    false],
+                ['Avg turnaround', $avgTurnaroundLabel,                             '',  'up',   $charts['turnaround'], 'var(--ink)',    false],
+                ['Queue depth',    (string) $counts['all'],                         '',  'warn', $charts['queue'],      'var(--ink)',    false],
+                ['Active tuners',  $activeTuners . ' / ' . $totalTuners, $idleTuners . ' idle', 'warn', $charts['tuners'], 'var(--ink)', false],
+                ['Disputes open',  (string) $openDisputes,                          '',  'warn', $charts['disputes'],   'var(--ink)',    false],
             ];
         @endphp
         @foreach ($kpis as [$label, $val, $delta, $deltaKind, $series, $color, $fill])

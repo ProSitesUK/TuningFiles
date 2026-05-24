@@ -21,6 +21,14 @@ class AdminSettings extends Component
             'ga4_measurement_id'   => SiteSetting::get('ga4_measurement_id', ''),
             'gsc_verification'     => SiteSetting::get('gsc_verification', ''),
             'footer_company_line'  => SiteSetting::get('footer_company_line', '© '.date('Y').' tuningfiles ltd · Bristol, UK'),
+
+            // Payment gateways
+            'gateway_stripe_enabled'   => SiteSetting::get('gateway_stripe_enabled', 'true'),
+            'gateway_bank_enabled'     => SiteSetting::get('gateway_bank_enabled', 'false'),
+            'gateway_bank_details'     => SiteSetting::get('gateway_bank_details', ''),
+            'gateway_invoice_enabled'  => SiteSetting::get('gateway_invoice_enabled', 'false'),
+            'gateway_invoice_terms'    => SiteSetting::get('gateway_invoice_terms', 'net_30'),
+            'gateway_invoice_company'  => SiteSetting::get('gateway_invoice_company', ''),
         ];
     }
 
@@ -35,6 +43,14 @@ class AdminSettings extends Component
             'form.ga4_measurement_id'  => 'nullable|string|max:32|regex:/^G-[A-Z0-9]+$/',
             'form.gsc_verification'    => 'nullable|string|max:255',
             'form.footer_company_line' => 'nullable|string|max:160',
+
+            // Payment gateways
+            'form.gateway_stripe_enabled'  => 'required|in:true,false',
+            'form.gateway_bank_enabled'    => 'required|in:true,false',
+            'form.gateway_bank_details'    => 'nullable|string|max:1000',
+            'form.gateway_invoice_enabled' => 'required|in:true,false',
+            'form.gateway_invoice_terms'   => 'required|in:net_7,net_14,net_30,net_60',
+            'form.gateway_invoice_company' => 'nullable|string|max:1000',
         ], [
             'form.ga4_measurement_id.regex' => 'GA4 measurement IDs look like G-XXXXXXXXXX.',
         ]);

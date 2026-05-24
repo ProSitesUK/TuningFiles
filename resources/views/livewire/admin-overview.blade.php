@@ -19,7 +19,7 @@
             <div class="card-head">
                 <div>
                     <div class="metric-label">Orders / day</div>
-                    <div class="metric-big">988 <span class="badge badge-green badge-soft"><span class="badge-dot"></span> +18% vs prev</span></div>
+                    <div class="metric-big">{{ number_format($ordersCount) }} <span class="badge badge-{{ $ordersCountDelta >= 0 ? 'green' : 'red' }} badge-soft"><span class="badge-dot"></span> {{ $ordersCountDelta >= 0 ? '+' : '' }}{{ $ordersCountDelta }}% vs prev</span></div>
                 </div>
                 <div class="seg seg-sm">
                     <button class="seg-btn seg-btn-active" type="button">last 14d</button>
@@ -35,24 +35,16 @@
             </div>
             <div class="donut-row">
                 <div class="donut-wrap">
-                    <x-donut
-                        :slices="[
-                            ['value' => 38, 'color' => 'var(--accent)'],
-                            ['value' => 28, 'color' => 'var(--ink)'],
-                            ['value' => 18, 'color' => 'var(--muted)'],
-                            ['value' => 16, 'color' => 'var(--border-strong)'],
-                        ]"
-                        :size="150" :thickness="20" />
+                    <x-donut :slices="$donutSlices" :size="150" :thickness="20" />
                     <div class="donut-center">
-                        <div class="donut-big">412</div>
-                        <div class="donut-sub">files / day</div>
+                        <div class="donut-big">{{ number_format($donutCenter) }}</div>
+                        <div class="donut-sub">files total</div>
                     </div>
                 </div>
                 <div class="legend">
-                    <div class="legend-row"><span class="legend-sw" style="background:var(--accent)"></span><span>Stage 1</span><b>38%</b></div>
-                    <div class="legend-row"><span class="legend-sw" style="background:var(--ink)"></span><span>Stage 2</span><b>28%</b></div>
-                    <div class="legend-row"><span class="legend-sw" style="background:var(--muted)"></span><span>Custom</span><b>18%</b></div>
-                    <div class="legend-row"><span class="legend-sw" style="background:var(--border-strong)"></span><span>Other</span><b>16%</b></div>
+                    @foreach ($donutLegend as $item)
+                        <div class="legend-row"><span class="legend-sw" style="background:{{ $item['color'] }}"></span><span>{{ $item['label'] }}</span><b>{{ $item['percent'] }}%</b></div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -62,11 +54,10 @@
     <div class="kpi-row">
         @php
             $kpis = [
-                ['MRR',           '£48.4k', '+6.2% mom', 'up', $series['revenue'],  'var(--accent)', true],
-                ['ARPU',          '£34',    '+£2',       'up', $series['revenue'],  'var(--ink)',    false],
-                ['Refund rate',   '0.8%',   '−0.3pp',    'up', $series['disputes'], 'var(--ink)',    false],
-                ['SLA hit',       '98.2%',  '+0.4pp',    'up', $series['tuners'],   'var(--ink)',    false],
-                ['NPS · 30d',     '62',     '+4',        'up', $series['tuners'],   'var(--ink)',    false],
+                ['Revenue',       $revenueFormatted,      ($revenueDelta >= 0 ? '+' : '') . $revenueDelta . '%',    $revenueDelta >= 0 ? 'up' : 'down',    $series['revenue'],  'var(--accent)', true],
+                ['ARPU',          $arpuFormatted,          ($arpuDelta >= 0 ? '+' : '') . $arpuDelta . '%',          $arpuDelta >= 0 ? 'up' : 'down',       $series['revenue'],  'var(--ink)',    false],
+                ['Refund rate',   $refundRateFormatted,    ($refundRateDelta >= 0 ? '+' : '') . round($refundRateDelta, 1) . 'pp', $refundRateDelta <= 0 ? 'up' : 'down', $series['disputes'], 'var(--ink)', false],
+                ['SLA hit',       $slaHitFormatted,        ($slaHitDelta >= 0 ? '+' : '') . round($slaHitDelta, 1) . 'pp',         $slaHitDelta >= 0 ? 'up' : 'down',    $series['tuners'],   'var(--ink)',    false],
             ];
         @endphp
         @foreach ($kpis as [$label, $val, $delta, $deltaKind, $data, $color, $fill])
@@ -86,7 +77,7 @@
         <div class="card">
             <div class="card-head card-pad-x">
                 <div>
-                    <div class="metric-label">Top customers · 30d</div>
+                    <div class="metric-label">Top customers · {{ $range }}</div>
                     <div class="metric-mid">By revenue</div>
                 </div>
                 <div class="card-head-r">
@@ -128,7 +119,7 @@
                 <span class="badge badge-green badge-soft"><span class="badge-dot pulse"></span> streaming</span>
             </div>
             <div class="activity">
-                @foreach ($activity as [$dot, $text, $ago])
+                @forelse ($activity as [$dot, $text, $ago])
                     <div class="act-row">
                         <span class="dot dot-{{ $dot }}"></span>
                         <div class="act-text">
@@ -136,7 +127,14 @@
                             <div class="t-mute">{{ $ago }}</div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="act-row">
+                        <span class="dot dot-mute"></span>
+                        <div class="act-text">
+                            <div>No recent activity</div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

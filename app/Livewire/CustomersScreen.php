@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\CustomerProfile;
 use App\Models\Dispute;
 use App\Models\Order;
 use App\Models\User;
@@ -16,6 +17,14 @@ class CustomersScreen extends Component
     public function selectCustomer(int $id): void
     {
         $this->selected = $id;
+    }
+
+    public function toggleCanInvoice(int $userId): void
+    {
+        $profile = CustomerProfile::where('user_id', $userId)->first();
+        if ($profile) {
+            $profile->update(['can_invoice' => ! $profile->can_invoice]);
+        }
     }
 
     public function render()

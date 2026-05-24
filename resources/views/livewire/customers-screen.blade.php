@@ -75,6 +75,18 @@
                         <div class="cust-kpi"><div class="metric-label">Refunds</div><div class="cust-kpi-val">{{ $refundsTotal > 0 ? '£'.$refundsTotal : '£0' }}</div></div>
                     </div>
 
+                    {{-- Invoice permission toggle --}}
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:8px; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:6px">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; margin:0">
+                            <input type="checkbox"
+                                   wire:click="toggleCanInvoice({{ $sel->id }})"
+                                   {{ ($cp?->can_invoice ?? false) ? 'checked' : '' }}
+                                   style="margin:0" />
+                            <span>Allow invoice payments</span>
+                        </label>
+                        <span class="t-mute small">Customer can request invoices instead of paying upfront</span>
+                    </div>
+
                     <div class="cust-orders-head">
                         <div class="metric-label">Order history</div>
                         <span class="t-mute small">last 12</span>

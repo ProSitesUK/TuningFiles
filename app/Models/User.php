@@ -37,6 +37,7 @@ class User extends Authenticatable
     public function orders(): HasMany             { return $this->hasMany(Order::class, 'customer_id'); }
     public function assignedOrders(): HasMany     { return $this->hasMany(Order::class, 'assigned_tuner_id'); }
     public function creditTransactions(): HasMany { return $this->hasMany(CreditTransaction::class); }
+    public function invoices(): HasMany            { return $this->hasMany(Invoice::class); }
     public function tickets(): HasMany            { return $this->hasMany(Ticket::class, 'customer_id'); }
 
     public function isAdmin(): bool      { return $this->hasAnyRole(['admin', 'operations']); }
