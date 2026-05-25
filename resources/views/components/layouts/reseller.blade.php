@@ -70,26 +70,35 @@
         </nav>
 
         <div class="sidebar-user">
-            <span class="avatar avatar-accent" style="width:32px;height:32px;font-size:12px">{{ auth()->user()->initials() }}</span>
-            <div class="sidebar-user-text">
-                <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
-                <div class="sidebar-user-role">
-                    <livewire:staff-status-toggle />
+            <a href="{{ route('profile') }}" class="sidebar-user-link" style="text-decoration:none; color:inherit">
+                <span class="avatar avatar-accent" style="width:32px;height:32px;font-size:12px">{{ auth()->user()->initials() }}</span>
+                <div class="sidebar-user-text">
+                    <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
+                    <div class="sidebar-user-role">
+                        <livewire:staff-status-toggle />
+                    </div>
                 </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">@csrf
-                <button type="submit" class="signout-btn" title="Sign out">
+            </a>
+            <div class="sidebar-user-actions">
+                <a href="{{ route('profile') }}" class="sidebar-action-btn" title="Profile" style="text-decoration:none">
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M15 17 L20 12 L15 7"/><path d="M20 12 H9"/><path d="M9 21 H5 a2 2 0 0 1 -2 -2 V5 a2 2 0 0 1 2 -2 h4"/>
+                        <path d="M20 21 v-2 a4 4 0 0 0 -4 -4 H8 a4 4 0 0 0 -4 4 v2"/><circle cx="12" cy="7" r="4"/>
                     </svg>
-                </button>
-            </form>
+                </a>
+                <form method="POST" action="{{ route('logout') }}">@csrf
+                    <button type="submit" class="sidebar-action-btn sidebar-action-logout" title="Sign out">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 17 L20 12 L15 7"/><path d="M20 12 H9"/><path d="M9 21 H5 a2 2 0 0 1 -2 -2 V5 a2 2 0 0 1 2 -2 h4"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
         </div>
     </aside>
 
     <div class="main">
         <header class="topbar">
-            <button class="admin-hamburger" @click="sidebarOpen = !sidebarOpen" aria-label="Toggle sidebar">
+            <button class="admin-hamburger" @click.stop="sidebarOpen = !sidebarOpen" aria-label="Toggle sidebar">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
@@ -103,6 +112,28 @@
             </div>
             <div class="topbar-right">
                 <x-theme-toggle />
+                <livewire:admin-notifications />
+                <div class="topbar-user" x-data="{ userMenu: false }" @click.outside="userMenu = false">
+                    <button class="topbar-avatar" @click="userMenu = !userMenu" type="button">
+                        <span class="avatar avatar-accent" style="width:28px;height:28px;font-size:10px">{{ auth()->user()->initials() }}</span>
+                    </button>
+                    <div class="topbar-user-menu" x-show="userMenu" x-transition x-cloak>
+                        <div class="topbar-user-info">
+                            <strong>{{ auth()->user()->name }}</strong>
+                            <span class="t-mute small">{{ auth()->user()->email }}</span>
+                        </div>
+                        <a href="{{ route('profile') }}" class="topbar-user-item" @click="userMenu = false">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21 v-2 a4 4 0 0 0 -4 -4 H8 a4 4 0 0 0 -4 4 v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Profile & password
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}">@csrf
+                            <button type="submit" class="topbar-user-item topbar-user-logout">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17 L20 12 L15 7"/><path d="M20 12 H9"/><path d="M9 21 H5 a2 2 0 0 1 -2 -2 V5 a2 2 0 0 1 2 -2 h4"/></svg>
+                                Sign out
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </header>
 
