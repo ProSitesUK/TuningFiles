@@ -10,11 +10,11 @@
                     <span class="dot dot-ok"></span> No setup fees · Cancel anytime · 14-day free trial
                 </div>
                 <h1 class="mk-hero-title">
-                    Start your tuning business.<br/>
+                    Sell your own ECU tuning files.<br/>
                     <span class="mk-accent">We handle the platform.</span>
                 </h1>
                 <p class="mk-hero-sub">
-                    Run your own branded file service on tuningfiles. Set your pricing, manage your customers, keep your brand front and centre. Infrastructure, payments, and file delivery are on us.
+                    Your files, your brand, your pricing. Set up your branded portal in under 5 minutes and start selling to your customers today.
                 </p>
                 <div class="mk-hero-actions">
                     <a href="#signup" class="primary-btn primary-btn-lg" style="text-decoration:none">Create your account</a>
@@ -35,7 +35,7 @@
                             <rect x="3" y="3" width="18" height="18" rx="3" /><path d="M9 12 h6 M12 9 v6" />
                         </svg>
                     </div>
-                    <h3 class="mk-step-t">Your own branded portal</h3>
+                    <h3 class="mk-step-t">Sell under your brand</h3>
                     <p class="mk-step-body">Your customers see your brand, your logo, your domain. They sign up at your URL, place orders through your interface, and never see ours.</p>
                 </div>
                 <div class="mk-step">
@@ -45,7 +45,7 @@
                         </svg>
                     </div>
                     <h3 class="mk-step-t">Set your own pricing</h3>
-                    <p class="mk-step-body">Choose your own credit pricing and markups. You control what your customers pay. Buy credits wholesale, sell at your rate, keep the margin.</p>
+                    <p class="mk-step-body">Choose your own credit pricing and markups. You control what your customers pay. Every file you tune, sold under your brand, at your price. Buy credits wholesale, sell at your rate, keep the margin.</p>
                 </div>
                 <div class="mk-step">
                     <div class="mk-step-n mono">

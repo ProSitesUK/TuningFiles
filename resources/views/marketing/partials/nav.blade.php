@@ -14,6 +14,7 @@
             <a href="{{ route('results') }}">Results</a>
             <a href="{{ route('home') }}#pricing">Pricing</a>
             <a href="{{ route('blog.index') }}">Blog</a>
+            <a href="{{ route('tuner.signup') }}">Sell files</a>
             <a href="{{ route('home') }}#tuners">For tuners</a>
         </nav>
         <div class="mk-nav-actions">
@@ -51,6 +52,7 @@
             <a href="{{ route('results') }}" @click="mobileOpen = false">Results</a>
             <a href="{{ route('home') }}#pricing" @click="mobileOpen = false">Pricing</a>
             <a href="{{ route('blog.index') }}" @click="mobileOpen = false">Blog</a>
+            <a href="{{ route('tuner.signup') }}" @click="mobileOpen = false">Sell files</a>
             <a href="{{ route('home') }}#tuners" @click="mobileOpen = false">For tuners</a>
         </nav>
         <div class="mk-mobile-actions">

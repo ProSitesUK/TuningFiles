@@ -17,6 +17,7 @@
                     <a href="{{ route('results') }}">Results</a>
                     <a href="#pricing">Pricing</a>
                     <a href="{{ route('blog.index') }}">Blog</a>
+                    <a href="{{ route('tuner.signup') }}">Sell files</a>
                     <a href="#tuners">For tuners</a>
                 </nav>
                 <div class="mk-nav-actions">
@@ -54,6 +55,7 @@
                     <a href="{{ route('results') }}" @click="mobileOpen = false">Results</a>
                     <a href="#pricing" @click="mobileOpen = false">Pricing</a>
                     <a href="{{ route('blog.index') }}" @click="mobileOpen = false">Blog</a>
+                    <a href="{{ route('tuner.signup') }}" @click="mobileOpen = false">Sell files</a>
                     <a href="#tuners" @click="mobileOpen = false">For tuners</a>
                 </nav>
                 <div class="mk-mobile-actions">
@@ -80,11 +82,11 @@
                 </h1>
                 <p class="mk-hero-sub">
                     Stage 1 to full custom remaps from a network of vetted tuners.
-                    Upload your read, get a tested file back — checksum-correct, dyno-validated, original retained.
+                    Upload your read, get a tested file back — or <strong>start selling your own files</strong> on your own branded portal.
                 </p>
                 <div class="mk-hero-actions">
-                    <a href="{{ route('register') }}" class="primary-btn primary-btn-lg" style="text-decoration:none">Open a workshop account</a>
-                    <a href="{{ route('login') }}" class="ghost-btn ghost-btn-lg" style="text-decoration:none">Sign in</a>
+                    <a href="{{ route('register') }}" class="primary-btn primary-btn-lg" style="text-decoration:none">Buy tuning files</a>
+                    <a href="{{ route('tuner.signup') }}" class="ghost-btn ghost-btn-lg" style="text-decoration:none">Sell your own files →</a>
                 </div>
                 <div class="mk-hero-trust">
                     <span>Trusted by</span>
@@ -160,6 +162,27 @@
                 ] as [$n, $l])
                     <div class="mk-stat"><div class="mk-stat-n">{{ $n }}</div><div class="mk-stat-l">{{ $l }}</div></div>
                 @endforeach
+            </div>
+        </section>
+
+        {{-- =================== TWO WAYS =================== --}}
+        <section class="mk-section" style="padding-top:50px; padding-bottom:50px">
+            <div class="mk-section-head" style="text-align:center; margin-bottom:28px">
+                <span class="mk-kicker">Two ways to use TuningFiles</span>
+            </div>
+            <div class="grid-2" style="max-width:900px; margin:0 auto; grid-template-columns:1fr 1fr">
+                <div class="card card-pad" style="text-align:center; padding:32px 24px">
+                    <div style="font-size:28px; margin-bottom:10px">🔧</div>
+                    <h3 style="font-size:20px; font-weight:600; margin:0 0 10px; letter-spacing:-0.01em">Buy tuning files</h3>
+                    <p class="t-mute" style="font-size:14px; line-height:1.55; margin:0 0 18px">Upload your ECU read, get a tested file back in minutes. Pay per file or buy credit packs for volume discounts.</p>
+                    <a href="{{ route('register') }}" class="primary-btn primary-btn-sm" style="text-decoration:none">Get started free</a>
+                </div>
+                <div class="card card-pad" style="text-align:center; padding:32px 24px; border-color:var(--accent)">
+                    <div style="font-size:28px; margin-bottom:10px">💰</div>
+                    <h3 style="font-size:20px; font-weight:600; margin:0 0 10px; letter-spacing:-0.01em">Sell your own files</h3>
+                    <p class="t-mute" style="font-size:14px; line-height:1.55; margin:0 0 18px">Run your own branded tuning portal. Set your pricing, manage your customers — we handle payments and delivery.</p>
+                    <a href="{{ route('tuner.signup') }}" class="primary-btn primary-btn-sm" style="text-decoration:none; background:var(--accent)">Start selling →</a>
+                </div>
             </div>
         </section>
 
@@ -386,6 +409,11 @@
             </div>
             <div style="text-align:center; margin-top:24px">
                 <p class="t-mute" style="font-size:14px; max-width:560px; margin:0 auto">No credit pack required — pay per file from your first tune. <b>Card, bank transfer, or invoice</b> accepted. <a href="{{ route('register') }}" style="color:var(--accent)">Try it now →</a></p>
+            </div>
+            <div class="card card-pad" style="text-align:center; margin-top:24px; max-width:600px; margin-left:auto; margin-right:auto; border-color:var(--accent)">
+                <p style="font-size:15px; font-weight:600; margin:0 0 6px">Are you a tuner?</p>
+                <p class="t-mute" style="font-size:14px; margin:0 0 12px">Sell your own files on your own terms. White-label portal, custom pricing, full control.</p>
+                <a href="{{ route('tuner.signup') }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">See tuner plans →</a>
             </div>
         </section>
 
