@@ -104,21 +104,25 @@
                         <span class="t-mute small">Customer can request invoices instead of paying upfront</span>
                     </div>
 
-                    {{-- Reseller status --}}
+                    {{-- Role management --}}
                     <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border)">
-                        <div class="metric-label" style="margin-bottom:8px">Reseller status</div>
-                        @if ($sel->hasRole('reseller'))
-                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
-                                <span class="badge badge-success">Reseller</span>
-                                @if ($sel->resellerProfile)
-                                    <span class="t-mute small">{{ $sel->resellerProfile->business_name }} · {{ $sel->subCustomers()->count() }} customers</span>
-                                @endif
-                            </div>
-                            <button type="button" wire:click="removeReseller({{ $sel->id }})" wire:confirm="Remove reseller role? Their profile data will be kept." class="ghost-btn ghost-btn-sm" style="color:var(--danger)">Remove reseller role</button>
-                        @else
-                            <p class="t-mute small" style="margin-bottom:8px">This customer is not a reseller. Upgrading gives them their own tenant portal at /reseller.</p>
-                            <button type="button" wire:click="makeReseller({{ $sel->id }})" class="primary-btn primary-btn-sm">Upgrade to reseller</button>
-                        @endif
+                        <div class="metric-label" style="margin-bottom:8px">Roles</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px">
+                            @foreach (['customer', 'reseller', 'tuner', 'operations', 'admin'] as $role)
+                                <label style="display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border:1px solid var(--border); border-radius:var(--r-sm); font-size:12.5px; cursor:pointer; background:{{ $sel->hasRole($role) ? 'var(--accent-soft)' : 'var(--surface)' }}">
+                                    <input type="checkbox"
+                                           wire:click="toggleRole({{ $sel->id }}, '{{ $role }}')"
+                                           {{ $sel->hasRole($role) ? 'checked' : '' }}
+                                           style="margin:0" />
+                                    {{ ucfirst($role) }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="t-mute small" style="margin-top:6px">
+                            @if ($sel->hasRole('reseller') && $sel->resellerProfile)
+                                Reseller: {{ $sel->resellerProfile->business_name }} · {{ $sel->subCustomers()->count() }} sub-customers
+                            @endif
+                        </p>
                     </div>
 
                     <div class="cust-orders-head">
