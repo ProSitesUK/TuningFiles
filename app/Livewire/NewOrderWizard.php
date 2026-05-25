@@ -98,12 +98,8 @@ class NewOrderWizard extends Component
         $payPerFileEnabled = SiteSetting::get('pay_per_file_enabled', 'true') === 'true';
 
         if ($this->paymentMethod === 'credits' && $balance < $cost) {
-            if ($payPerFileEnabled) {
-                $this->paymentMethod = 'pay_now';
-            } else {
-                $this->addError('upload', "Not enough credits (need {$cost}, you have {$balance}). Buy more first.");
-                return;
-            }
+            $this->addError('upload', "Not enough credits (need {$cost}, you have {$balance}). Buy more credits first or select 'Pay now'.");
+            return;
         }
 
         $next = (int) (Order::max('reference') ?? 4000) + 1;
@@ -212,13 +208,12 @@ class NewOrderWizard extends Component
                 'balance_after'  => $balance,
                 'amount_pennies' => $amountPennies,
                 'payment_method' => 'stripe',
-                'payment_status' => config('cashier.secret') ? 'pending' : 'completed',
-                'note'           => "Pay-per-file for order #{$order->reference}",
+                'payment_status' => 'pending',
+                'note'           => "Pay-per-file for order #{$order->reference} — awaiting payment",
             ]);
 
             $user->notify(new OrderQueued($order));
 
-            // Notify tenant if order is from a sub-customer
             if ($user->reseller_id) {
                 $reseller = User::find($user->reseller_id);
                 if ($reseller) {
@@ -226,7 +221,7 @@ class NewOrderWizard extends Component
                 }
             }
 
-            // Dev mode: no Stripe configured -- mark completed immediately
+            // Dev mode: no Stripe — order created but payment pending (needs admin/reseller approval)
             if (! config('cashier.secret')) {
                 $this->redirect(route('app.orders.show', $order), navigate: true);
                 return;
