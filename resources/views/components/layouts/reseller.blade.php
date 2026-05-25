@@ -11,13 +11,18 @@
     $rProfile = auth()->user()->resellerProfile;
     $brandName = $rProfile?->business_name ?? 'Reseller';
 
-    $subCount   = auth()->user()->subCustomers()->count();
-    $orderCount = \App\Models\Order::where('reseller_id', auth()->id())->count();
+    $subCount      = auth()->user()->subCustomers()->count();
+    $orderCount    = \App\Models\Order::where('reseller_id', auth()->id())->count();
+    $pendingCount  = \App\Models\CreditTransaction::whereIn('user_id', auth()->user()->subCustomers()->pluck('id'))
+        ->where('payment_status', 'pending')
+        ->whereIn('payment_method', ['bank', 'invoice'])
+        ->count();
 
     $nav = [
         ['id' => 'reseller.dashboard', 'label' => 'Dashboard',  'icon' => 'overview'],
         ['id' => 'reseller.customers', 'label' => 'Customers',  'icon' => 'customers', 'count' => $subCount],
         ['id' => 'reseller.orders',    'label' => 'Orders',     'icon' => 'queue',     'count' => $orderCount],
+        ['id' => 'reseller.payments',  'label' => 'Payments',   'icon' => 'credits',   'count' => $pendingCount > 0 ? $pendingCount : null, 'dot' => $pendingCount > 0 ? 'err' : null],
         ['id' => 'reseller.pricing',   'label' => 'Pricing',    'icon' => 'credits'],
         ['id' => 'reseller.billing',   'label' => 'Billing',    'icon' => 'revenue'],
         ['id' => 'reseller.settings',  'label' => 'Settings',   'icon' => 'reports'],
@@ -29,6 +34,7 @@
         'reseller.invite'       => 'Invite customer',
         'reseller.orders'       => 'Orders',
         'reseller.orders.show'  => 'Order detail',
+        'reseller.payments'     => 'Payments',
         'reseller.pricing'      => 'Pricing',
         'reseller.billing'      => 'Billing',
         'reseller.plans'        => 'Plans',

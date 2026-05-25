@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified', 'role:reseller'])
             return view('reseller.order', ['order' => $order]);
         })->name('orders.show');
         Route::view('/pricing',   'reseller.pricing')->name('pricing');
+        Route::view('/payments',  'reseller.payments')->name('payments');
         Route::view('/settings',  'reseller.settings')->name('settings');
 
         // Subscription billing
