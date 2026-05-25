@@ -14,6 +14,7 @@
                 <nav class="mk-nav-links">
                     <a href="#how">How it works</a>
                     <a href="{{ route('vehicles') }}">Supported</a>
+                    <a href="{{ route('results') }}">Results</a>
                     <a href="#pricing">Pricing</a>
                     <a href="{{ route('blog.index') }}">Blog</a>
                     <a href="#tuners">For tuners</a>
@@ -50,6 +51,7 @@
                 <nav class="mk-mobile-links">
                     <a href="#how" @click="mobileOpen = false">How it works</a>
                     <a href="{{ route('vehicles') }}" @click="mobileOpen = false">Supported</a>
+                    <a href="{{ route('results') }}" @click="mobileOpen = false">Results</a>
                     <a href="#pricing" @click="mobileOpen = false">Pricing</a>
                     <a href="{{ route('blog.index') }}" @click="mobileOpen = false">Blog</a>
                     <a href="#tuners" @click="mobileOpen = false">For tuners</a>
@@ -199,7 +201,7 @@
                 @foreach ([
                     ['01', 'Upload your read', 'Drop in your ECU read from KESS, Autotuner, MPPS or PCM. We validate the ECU id, checksum and DTCs before it leaves your browser.'],
                     ['02', 'A tuner picks it up', 'Auto-assigned by vehicle expertise and current load. You can watch the timeline live — every map change, every QA pass.'],
-                    ['03', 'Get the tuned file', 'Delivered with a 24-hour revision window, a torque/HP preview chart, and the original file retained side-by-side.'],
+                    ['03', 'Get the tuned file', 'Delivered with a 24-hour free revision window and a 30-day credit-back guarantee. Original file retained. Not happy? Credits back, no questions asked.'],
                 ] as [$n, $t, $body])
                     <div class="mk-step">
                         <div class="mk-step-n mono">{{ $n }}</div>
@@ -245,29 +247,59 @@
             </div>
         </section>
 
-        {{-- =================== SHOWCASE =================== --}}
+        {{-- =================== RESULTS =================== --}}
+        @php
+            $latestResults = \App\Models\DynoResult::approved()
+                ->with('user:id,name')
+                ->orderByDesc('created_at')
+                ->limit(4)
+                ->get();
+        @endphp
         <section class="mk-section">
-            <div class="mk-section-head">
-                <span class="mk-kicker">Recent work</span>
-                <h2 class="mk-section-title">Files that left the queue this week.</h2>
-                <p class="mk-section-sub">A small selection from the 412 tuned today — every one checksum-correct, dyno-validated, original retained.</p>
+            <div class="mk-section-head" style="display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+                <div>
+                    <span class="mk-kicker">Real results</span>
+                    <h2 class="mk-section-title" style="margin-top:8px">Verified gains from real customers.</h2>
+                </div>
+                <a href="{{ route('results') }}" class="ghost-btn ghost-btn-sm" style="text-decoration:none">View all →</a>
             </div>
-            <div class="mk-showcase">
-                @foreach ([
-                    ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=80', 'Porsche 911 GT3', 'Stage 1 · +38 hp'],
-                    ['https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=900&q=80', 'Audi R8 V10', 'Stage 2 · +62 hp'],
-                    ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&q=80', 'Chevrolet Camaro', 'Custom remap'],
-                    ['https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=900&q=80', 'Mercedes-AMG C63', 'Stage 1 + DPF'],
-                ] as [$src, $veh, $tag])
-                    <figure class="mk-shot">
-                        <img src="{{ $src }}" alt="{{ $veh }}" loading="lazy" />
-                        <figcaption class="mk-shot-caption">
-                            <span class="mk-shot-veh">{{ $veh }}</span>
-                            <span class="mk-shot-tag">{{ $tag }}</span>
-                        </figcaption>
-                    </figure>
-                @endforeach
-            </div>
+            @if ($latestResults->isNotEmpty())
+                <div class="mk-showcase">
+                    @foreach ($latestResults as $r)
+                        <figure class="mk-shot">
+                            @if ($r->image_url)
+                                <img src="{{ $r->image_url }}" alt="{{ $r->vehicle_make }} {{ $r->vehicle_model }}" loading="lazy" />
+                            @else
+                                <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--surface-2),var(--surface));display:grid;place-items:center">
+                                    <span class="mono" style="font-size:18px;color:var(--muted)">{{ $r->vehicle_make }}</span>
+                                </div>
+                            @endif
+                            <figcaption class="mk-shot-caption">
+                                <span class="mk-shot-veh">{{ $r->vehicle_make }} {{ $r->vehicle_model }}</span>
+                                <span class="mk-shot-tag">{{ $r->stock_hp }} → {{ $r->tuned_hp }} hp (+{{ $r->hpGain() }})</span>
+                            </figcaption>
+                        </figure>
+                    @endforeach
+                </div>
+            @else
+                {{-- Fallback to static showcase if no results yet --}}
+                <div class="mk-showcase">
+                    @foreach ([
+                        ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=80', 'Porsche 911 GT3', 'Stage 1 · +38 hp'],
+                        ['https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=900&q=80', 'Audi R8 V10', 'Stage 2 · +62 hp'],
+                        ['https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&q=80', 'Chevrolet Camaro', 'Custom remap'],
+                        ['https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=900&q=80', 'Mercedes-AMG C63', 'Stage 1 + DPF'],
+                    ] as [$src, $veh, $tag])
+                        <figure class="mk-shot">
+                            <img src="{{ $src }}" alt="{{ $veh }}" loading="lazy" />
+                            <figcaption class="mk-shot-caption">
+                                <span class="mk-shot-veh">{{ $veh }}</span>
+                                <span class="mk-shot-tag">{{ $tag }}</span>
+                            </figcaption>
+                        </figure>
+                    @endforeach
+                </div>
+            @endif
         </section>
 
         {{-- =================== LATEST BLOG =================== --}}
@@ -306,6 +338,17 @@
             </section>
         @endif
 
+        {{-- =================== REFERRAL =================== --}}
+        <section class="mk-cta" style="margin:0 24px; border-radius:14px">
+            <div class="mk-cta-inner">
+                <div>
+                    <h2 class="mk-cta-title">Refer a workshop, earn credits.</h2>
+                    <p class="mk-cta-sub">Share your referral link — when they place their first order, you both get {{ \App\Models\SiteSetting::get('referral_credits_referrer', '10') }} free credits. No limits.</p>
+                </div>
+                <a href="{{ route('register') }}" class="primary-btn primary-btn-lg" style="text-decoration:none">Get your referral link →</a>
+            </div>
+        </section>
+
         {{-- =================== PRICING =================== --}}
         <section id="pricing" class="mk-section">
             <div class="mk-section-head">
@@ -316,9 +359,9 @@
             <div class="mk-tiers">
                 @php
                     $tiers = [
-                        ['Pro',   '£32',     '/ file · pay-as-you-go',  'For independent shops and serious enthusiasts.',  ['Stage 1 & 2 maps', 'DPF / EGR / AdBlue', '24-hour revision window', 'File retention 12 months'],                                       'Start free', false],
-                        ['Trade', '£24',     '/ file · 50-pack',        'For workshops doing 30+ files a month.',          ['Everything in Pro', 'Trade-portal API + webhooks', 'Round-robin auto-assign', 'Priority queue · 30-min SLA', 'Dedicated tuner pool'], 'Open workshop account', true],
-                        ['VIP',   'custom',  'dedicated tuners',        'For groups, dealer networks and white-label.',    ['Everything in Trade', 'Custom remaps & race maps', 'Named dyno engineer', 'On-site setup support', 'SLA 99.5%'],                       'Talk to sales', false],
+                        ['Pro',   'From £32', '/ file · pay-as-you-go',  'For independent shops and enthusiasts. No credit pack required.',  ['Stage 1 & 2 maps', 'DPF / EGR / AdBlue', '24-hour revision window', '30-day guarantee', 'Pay by card or bank transfer'],                                       'Start free', false],
+                        ['Trade', '£24',     '/ file · 50-pack',        'For workshops doing 30+ files a month.',          ['Everything in Pro', 'Volume discount pricing', 'Invoice payments available', 'Priority queue · 30-min SLA', 'Dedicated tuner pool'], 'Open workshop account', true],
+                        ['VIP',   'custom',  'white-label portal',        'For tuning businesses and dealer networks.',    ['Everything in Trade', 'Your own branded portal', 'Custom pricing for your customers', 'Subscription management', 'Custom domain support'],                       'Talk to sales', false],
                     ];
                 @endphp
                 @foreach ($tiers as [$plan, $price, $unit, $blurb, $features, $cta, $featured])
@@ -341,41 +384,58 @@
                     </div>
                 @endforeach
             </div>
+            <div style="text-align:center; margin-top:24px">
+                <p class="t-mute" style="font-size:14px; max-width:560px; margin:0 auto">No credit pack required — pay per file from your first tune. <b>Card, bank transfer, or invoice</b> accepted. <a href="{{ route('register') }}" style="color:var(--accent)">Try it now →</a></p>
+            </div>
         </section>
 
-        {{-- =================== CTA BAND =================== --}}
-        <section id="tuners" class="mk-cta">
-            <div class="mk-cta-inner">
-                <div>
-                    <h2 class="mk-cta-title">Tune for us.</h2>
-                    <p class="mk-cta-sub">Looking for senior tuners with proven Bosch MED / EDC and modern Continental experience. Remote, paid per file, no on-call.</p>
-                </div>
-                <a href="{{ route('register') }}" class="primary-btn primary-btn-lg" style="text-decoration:none">Apply to the tuner network →</a>
+        {{-- =================== GUARANTEE =================== --}}
+        <section class="mk-section" style="text-align:center; max-width:800px; margin:0 auto; padding:60px 24px">
+            <div style="display:inline-flex; align-items:center; gap:10px; padding:10px 18px; background:var(--success-soft); border:1px solid var(--success); border-radius:999px; margin-bottom:18px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22 s8-4 8-10 V5 l-8-3-8 3 v7 c0 6 8 10 8 10z"/></svg>
+                <span style="font-weight:600; color:var(--success); font-size:14px">30-day credit-back guarantee</span>
             </div>
+            <h2 class="mk-section-title">Every file is guaranteed.</h2>
+            <p class="mk-section-sub" style="max-width:600px; margin:0 auto">If your tune doesn't work and can't be fixed via our free 24-hour revision window, you get your credits back within 30 days — no questions asked. We also retain your original file so you can always roll back.</p>
+        </section>
+
+        {{-- =================== FOR TUNERS / SAAS =================== --}}
+        <section id="tuners" class="mk-section">
+            <div class="mk-section-head" style="text-align:center">
+                <span class="mk-kicker">For tuners</span>
+                <h2 class="mk-section-title">Start your own tuning business.</h2>
+                <p class="mk-section-sub" style="max-width:600px; margin:0 auto">Run your own branded file service on our platform. Set your pricing, manage your customers, we handle the infrastructure. No setup fees, cancel anytime.</p>
+            </div>
+            @php $plans = \App\Models\SubscriptionPlan::active()->orderBy('sort_order')->get(); @endphp
+            @if ($plans->isNotEmpty())
+                <div class="mk-tiers">
+                    @foreach ($plans as $plan)
+                        <div class="mk-tier {{ $plan->slug === 'professional' ? 'mk-tier-featured' : '' }}">
+                            @if ($plan->slug === 'professional') <div class="mk-tier-flag">Most popular</div> @endif
+                            <div class="mk-tier-head">
+                                <div class="mk-tier-plan">{{ $plan->name }}</div>
+                                <div class="mk-tier-price">
+                                    <span class="mk-tier-num">{{ $plan->price_pennies > 0 ? '£'.number_format($plan->price_pennies / 100) : 'Custom' }}</span>
+                                    <span class="mk-tier-unit">{{ $plan->price_pennies > 0 ? '/ month' : 'contact us' }}</span>
+                                </div>
+                                <p class="mk-tier-blurb">{{ $plan->description }}</p>
+                            </div>
+                            <ul class="mk-tier-features">
+                                @foreach ($plan->features ?? [] as $f)
+                                    <li>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7"/></svg>
+                                        <span>{{ $f }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <a href="{{ route('register') }}" class="{{ $plan->slug === 'professional' ? 'primary-btn primary-btn-lg' : 'ghost-btn ghost-btn-lg' }}" style="text-decoration:none">Get started</a>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </section>
 
         {{-- =================== FOOTER =================== --}}
-        <footer class="mk-foot">
-            <div class="mk-foot-inner">
-                <div class="mk-foot-brand">
-                    <span class="mk-brand-mark">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="9" /><path d="M12 3 V12 L18 15" />
-                        </svg>
-                    </span>
-                    <span>tuningfiles</span>
-                </div>
-                <div class="mk-foot-cols">
-                    <div><b>Product</b><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#vehicles">Coverage</a></div>
-                    <div><b>Tuners</b><a href="#tuners">Apply</a><a href="#">Tuner agreement</a><a href="#">Payouts</a></div>
-                    <div><b>Company</b><a href="#">About</a><a href="#">Status · ok</a><a href="#">Contact</a></div>
-                    <div><b>Legal</b><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Refund policy</a></div>
-                </div>
-                <div class="mk-foot-bottom">
-                    <span class="t-mute small">© {{ date('Y') }} tuningfiles ltd · Bristol, UK</span>
-                    <span class="t-mute small mono">v 4.2.1 · all systems ok</span>
-                </div>
-            </div>
-        </footer>
+        @include('marketing.partials.footer')
     </div>
 </x-layouts.marketing>

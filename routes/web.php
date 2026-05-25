@@ -22,6 +22,12 @@ Route::get('/blog',          [\App\Http\Controllers\BlogController::class, 'inde
 Route::get('/blog/{post:slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 Route::get('/results', [\App\Http\Controllers\DynoResultsController::class, 'index'])->name('results');
 
+Route::view('/about', 'marketing.about')->name('about');
+Route::view('/contact', 'marketing.contact')->name('contact');
+Route::view('/terms', 'marketing.terms')->name('terms');
+Route::view('/privacy', 'marketing.privacy')->name('privacy');
+Route::view('/refunds', 'marketing.refunds')->name('refunds');
+
 /* SEO */
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
