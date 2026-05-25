@@ -46,7 +46,7 @@
                     <span>{{ $tenant->business_name }}</span>
                 </a>
 
-                <button class="mk-hamburger" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+                <button class="mk-hamburger" @click.stop="mobileOpen = !mobileOpen" aria-label="Toggle menu">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <template x-if="!mobileOpen"><g><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></g></template>
                         <template x-if="mobileOpen"><g><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></g></template>

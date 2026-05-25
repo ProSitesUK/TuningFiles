@@ -28,6 +28,9 @@ Route::view('/terms', 'marketing.terms')->name('terms');
 Route::view('/privacy', 'marketing.privacy')->name('privacy');
 Route::view('/refunds', 'marketing.refunds')->name('refunds');
 
+Route::get('/become-a-tuner', [\App\Http\Controllers\TunerSignupController::class, 'show'])->name('tuner.signup');
+Route::post('/become-a-tuner', [\App\Http\Controllers\TunerSignupController::class, 'store']);
+
 /* SEO */
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');

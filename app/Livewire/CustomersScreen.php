@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\CustomerProfile;
 use App\Models\Dispute;
 use App\Models\Order;
+use App\Models\ResellerProfile;
 use App\Models\User;
 use Livewire\Component;
 
@@ -25,6 +26,28 @@ class CustomersScreen extends Component
         if ($profile) {
             $profile->update(['can_invoice' => ! $profile->can_invoice]);
         }
+    }
+
+    public function makeReseller(int $userId): void
+    {
+        $user = User::findOrFail($userId);
+        $user->syncRoles(['customer', 'reseller', 'tuner']);
+
+        ResellerProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'business_name' => $user->name . "'s Tuning",
+                'slug' => \Illuminate\Support\Str::slug($user->name . '-tuning-' . $user->id),
+                'is_active' => true,
+            ]
+        );
+    }
+
+    public function removeReseller(int $userId): void
+    {
+        $user = User::findOrFail($userId);
+        $user->removeRole('reseller');
+        $user->removeRole('tuner');
     }
 
     public function render()

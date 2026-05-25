@@ -87,6 +87,23 @@
                         <span class="t-mute small">Customer can request invoices instead of paying upfront</span>
                     </div>
 
+                    {{-- Reseller status --}}
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border)">
+                        <div class="metric-label" style="margin-bottom:8px">Reseller status</div>
+                        @if ($sel->hasRole('reseller'))
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+                                <span class="badge badge-success">Reseller</span>
+                                @if ($sel->resellerProfile)
+                                    <span class="t-mute small">{{ $sel->resellerProfile->business_name }} · {{ $sel->subCustomers()->count() }} customers</span>
+                                @endif
+                            </div>
+                            <button type="button" wire:click="removeReseller({{ $sel->id }})" wire:confirm="Remove reseller role? Their profile data will be kept." class="ghost-btn ghost-btn-sm" style="color:var(--danger)">Remove reseller role</button>
+                        @else
+                            <p class="t-mute small" style="margin-bottom:8px">This customer is not a reseller. Upgrading gives them their own tenant portal at /reseller.</p>
+                            <button type="button" wire:click="makeReseller({{ $sel->id }})" class="primary-btn primary-btn-sm">Upgrade to reseller</button>
+                        @endif
+                    </div>
+
                     <div class="cust-orders-head">
                         <div class="metric-label">Order history</div>
                         <span class="t-mute small">last 12</span>
