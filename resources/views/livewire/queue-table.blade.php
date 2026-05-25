@@ -5,9 +5,18 @@
             <p class="page-sub">Updated just now · auto-refresh on · {{ $orders->total() }} of {{ $counts['all'] }} files</p>
         </div>
         <div class="page-actions">
-            <button class="ghost-btn" type="button">Today · {{ now()->format('M j') }} ▾</button>
-            <button class="ghost-btn" type="button">All tuners ▾</button>
-            <button class="ghost-btn" type="button"><x-icon name="download" size="14" /> Export CSV</button>
+            <select wire:model.live="dateFilter" class="ghost-btn" style="appearance:auto;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;background:var(--surface);color:var(--ink)">
+                <option value="all">All time</option>
+                <option value="today">Today &middot; {{ now()->format('M j') }}</option>
+                <option value="7d">Last 7 days</option>
+            </select>
+            <select wire:model.live="tunerFilter" class="ghost-btn" style="appearance:auto;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;background:var(--surface);color:var(--ink)">
+                <option value="all">All tuners</option>
+                @foreach ($tunerUsers as $t)
+                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                @endforeach
+            </select>
+            <button class="ghost-btn" type="button" wire:click="export"><x-icon name="download" size="14" /> Export CSV</button>
             <button class="primary-btn" type="button"><x-icon name="plus" size="14" /> Manual order</button>
         </div>
     </div>
@@ -54,11 +63,26 @@
             @endforeach
         </div>
         <div class="chips chips-r">
-            <button class="ghost-btn ghost-btn-sm" type="button">Stage ▾</button>
-            <button class="ghost-btn ghost-btn-sm" type="button">Tuner ▾</button>
-            <button class="ghost-btn ghost-btn-sm" type="button">ECU vendor ▾</button>
-            <button class="ghost-btn ghost-btn-sm" type="button">Date ▾</button>
-            <button class="ghost-btn ghost-btn-sm ghost-btn-accent" type="button">Save view</button>
+            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="sortColumn('options_label')">
+                Stage {{ $sortBy === 'options_label' ? ($sortDir === 'asc' ? '▲' : '▼') : '▾' }}
+            </button>
+            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="sortColumn('assigned_tuner_id')">
+                Tuner {{ $sortBy === 'assigned_tuner_id' ? ($sortDir === 'asc' ? '▲' : '▼') : '▾' }}
+            </button>
+            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="sortColumn('ecu_label')">
+                ECU vendor {{ $sortBy === 'ecu_label' ? ($sortDir === 'asc' ? '▲' : '▼') : '▾' }}
+            </button>
+            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="sortColumn('created_at')">
+                Date {{ $sortBy === 'created_at' ? ($sortDir === 'asc' ? '▲' : '▼') : '▾' }}
+            </button>
+            <button type="button" class="ghost-btn ghost-btn-sm ghost-btn-accent"
+                @click="localStorage.setItem('queue_filters', JSON.stringify({
+                    status: $wire.filter,
+                    dateFilter: $wire.dateFilter,
+                    tunerFilter: $wire.tunerFilter,
+                    sortBy: $wire.sortBy,
+                    sortDir: $wire.sortDir
+                })); alert('View saved')">Save view</button>
         </div>
     </div>
 
@@ -84,8 +108,8 @@
                     <tr class="t-row t-row-link" wire:click="$dispatch('order:open', { id: {{ $o->id }} })">
                         <td wire:click.stop>
                             <input type="checkbox" class="ck"
-                                   wire:click="toggle({{ $o->id }})"
-                                   {{ in_array($o->id, $selected) ? 'checked' : '' }} />
+                                   wire:click="toggleSelect({{ $o->id }})"
+                                   {{ in_array($o->id, $selectedOrders) ? 'checked' : '' }} />
                         </td>
                         <td class="mono">#{{ $o->reference }}</td>
                         <td><div class="cell-cust"><span class="avatar" style="width:22px;height:22px;font-size:9px">{{ $c?->initials() }}</span><span>{{ $c?->name }}</span></div></td>
@@ -111,10 +135,20 @@
         </table>
 
         <div class="table-foot">
-            <span class="t-mute">{{ $orders->total() }} of {{ $counts['all'] }} · {{ count($selected) }} selected</span>
+            <span class="t-mute">{{ $orders->total() }} of {{ $counts['all'] }} · {{ count($selectedOrders) }} selected</span>
             <div class="chips chips-r">
-                <button class="ghost-btn ghost-btn-sm" type="button" {{ count($selected) ? '' : 'disabled' }}>Bulk assign</button>
-                <button class="ghost-btn ghost-btn-sm" type="button" {{ count($selected) ? '' : 'disabled' }}>Export</button>
+                @if (count($selectedOrders) > 0)
+                    <select wire:model="bulkTunerId" class="ghost-btn ghost-btn-sm" style="appearance:auto;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:12px;background:var(--surface);color:var(--ink)">
+                        <option value="">Assign to...</option>
+                        @foreach ($tunerUsers as $t)
+                            <option value="{{ $t->id }}">{{ $t->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
+                <button class="ghost-btn ghost-btn-sm" type="button"
+                        wire:click="bulkAssign"
+                        {{ count($selectedOrders) && $bulkTunerId ? '' : 'disabled' }}>Bulk assign</button>
+                <button class="ghost-btn ghost-btn-sm" type="button" wire:click="export">Export</button>
                 <div class="pager">{!! $orders->onEachSide(1)->links() !!}</div>
             </div>
         </div>

@@ -8,6 +8,30 @@ use Livewire\Component;
 
 class LiveQueue extends Component
 {
+    public bool $paused = false;
+
+    public function togglePause(): void
+    {
+        $this->paused = !$this->paused;
+    }
+
+    public function rebalance(): void
+    {
+        $tuners = TunerProfile::where('status', 'live')->with('user')->get();
+        if ($tuners->isEmpty()) return;
+
+        $unassigned = Order::whereNull('assigned_tuner_id')
+            ->where('status', 'queued')
+            ->get();
+
+        $i = 0;
+        foreach ($unassigned as $order) {
+            $tuner = $tuners[$i % $tuners->count()];
+            $order->update(['assigned_tuner_id' => $tuner->user_id, 'assigned_at' => now()]);
+            $i++;
+        }
+    }
+
     public function render()
     {
         $orders = Order::with('customer', 'assignedTuner.tunerProfile')

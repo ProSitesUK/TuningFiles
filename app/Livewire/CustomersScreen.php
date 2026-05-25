@@ -79,6 +79,15 @@ class CustomersScreen extends Component
         }
     }
 
+    public function impersonate(int $userId): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+        $user = User::findOrFail($userId);
+        session()->put('impersonator_id', auth()->id());
+        auth()->login($user);
+        $this->redirect(route('dashboard'), navigate: false);
+    }
+
     public function render()
     {
         $q = User::role('customer')->with('customerProfile')->withCount('orders');

@@ -26,6 +26,8 @@ class OrderDrawer extends Component
     public ?int $orderId = null;
     public $tunedUpload = null;
     public ?int $reassignTo = null;
+    public bool $showAllEvents = false;
+    public string $chartTab = 'torque';
 
     #[On('order:open')]
     public function open(int $id): void
@@ -215,6 +217,29 @@ class OrderDrawer extends Component
         abort_unless(auth()->user()->isAdmin() || auth()->user()->isTuner(), 403);
         $file->update(['notes' => trim($notes) ?: null]);
     }
+
+    public function flagDispute(): void
+    {
+        abort_unless(auth()->user()->isAdmin(), 403);
+        $order = $this->getOrderProperty();
+        if (!$order) return;
+        $order->update(['status' => 'dispute']);
+        \App\Models\Dispute::create([
+            'order_id' => $order->id,
+            'reason' => 'Flagged by '.auth()->user()->name,
+            'status' => 'open',
+        ]);
+        OrderEvent::create([
+            'order_id' => $order->id,
+            'actor_id' => auth()->id(),
+            'stage' => 'dispute',
+            'state' => 'active',
+            'note' => 'dispute flagged by '.auth()->user()->name,
+            'happened_at' => now(),
+        ]);
+    }
+
+    public function toggleAllEvents(): void { $this->showAllEvents = !$this->showAllEvents; }
 
     public function downloadFile(int $fileId)
     {

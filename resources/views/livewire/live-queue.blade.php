@@ -7,9 +7,17 @@
         <div class="page-actions">
             <span class="badge badge-green badge-soft"><span class="badge-dot pulse"></span> Live</span>
             <button class="ghost-btn" type="button">Auto-assign · <b>on</b></button>
-            <button class="primary-btn" type="button">Pause intake</button>
+            <button class="primary-btn" type="button" wire:click="togglePause">
+                {{ $paused ? 'Resume intake' : 'Pause intake' }}
+            </button>
         </div>
     </div>
+
+    @if ($paused)
+        <div class="strip" style="background:var(--warning-bg, #fef3cd);color:var(--warning-text, #856404);padding:10px 16px;border-radius:6px;margin-bottom:12px;font-size:13px;font-weight:500">
+            Intake paused — new orders won't be auto-assigned
+        </div>
+    @endif
 
     {{-- ─────── Strip stats ─────── --}}
     <div class="strip">
@@ -90,7 +98,9 @@
             </div>
             <div class="card-head-r">
                 <button class="ghost-btn" type="button">Round-robin · <b>on</b></button>
-                <button class="ghost-btn" type="button">Rebalance</button>
+                <button class="ghost-btn" type="button"
+                        wire:click="rebalance"
+                        wire:confirm="Round-robin assign all unassigned queued orders to live tuners?">Rebalance</button>
                 <button class="ghost-btn ghost-btn-accent" type="button"><x-icon name="plus" size="12" /> Invite tuner</button>
             </div>
         </div>

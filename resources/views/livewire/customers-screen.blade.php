@@ -66,7 +66,7 @@
                             <span class="crumb-active">{{ $sel->name }}</span>
                         </div>
                     </div>
-                    <button class="ghost-btn ghost-btn-sm" type="button">Impersonate</button>
+                    <button class="ghost-btn ghost-btn-sm" type="button" wire:click="impersonate({{ $sel->id }})" wire:confirm="Impersonate {{ $sel->name }}? You'll be logged in as them.">Impersonate</button>
                 </div>
                 <div class="pane-content">
                     <div class="cust-head">

@@ -13,6 +13,8 @@ use Livewire\Component;
 class AdminOverview extends Component
 {
     public string $range = '7d';
+    public string $chartRange = '14d';
+    public string $customerSort = 'revenue';
 
     /**
      * Return [$start, $end, $prevStart, $prevEnd] for the selected range.
@@ -246,8 +248,14 @@ class AdminOverview extends Component
             ])
             ->toArray();
 
-        // ── Chart series (last 14 days or period length) ─────────────
-        $chartStart = now()->subDays(13)->startOfDay();
+        // ── Chart series (period based on chartRange) ────────────────
+        $chartDays = match ($this->chartRange) {
+            '7d'  => 6,
+            '14d' => 13,
+            '30d' => 29,
+            default => 13,
+        };
+        $chartStart = now()->subDays($chartDays)->startOfDay();
         $chartEnd   = now();
 
         $orderSeries     = $this->dailySeries(Order::class, 'created_at', $chartStart, $chartEnd);
@@ -297,10 +305,16 @@ class AdminOverview extends Component
         ];
 
         // ── Top customers ────────────────────────────────────────────
-        $topCustomers = CustomerProfile::with('user')
-            ->orderByDesc('total_spent_pennies')
-            ->limit(7)
-            ->get();
+        $topCustomersQuery = CustomerProfile::with('user');
+        if ($this->customerSort === 'orders') {
+            $topCustomersQuery->orderByDesc(
+                Order::selectRaw('count(*)')
+                    ->whereColumn('orders.customer_id', 'customer_profiles.user_id')
+            );
+        } else {
+            $topCustomersQuery->orderByDesc('total_spent_pennies');
+        }
+        $topCustomers = $topCustomersQuery->limit(7)->get();
 
         // Compute delta for each top customer: current vs previous period spend
         $deltas = $topCustomers->map(function ($cp) use ($start, $end, $prevStart, $prevEnd) {

@@ -136,6 +136,14 @@
     </aside>
 
     <div class="main">
+        @if (session('impersonator_id'))
+            <div style="background:var(--warn); color:#000; padding:8px 16px; font-size:13px; font-weight:600; display:flex; justify-content:space-between; align-items:center">
+                <span>Impersonating {{ auth()->user()->name }} ({{ auth()->user()->email }})</span>
+                <form method="POST" action="{{ route('stop-impersonating') }}">@csrf
+                    <button type="submit" style="background:#000; color:#fff; border:0; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px">Stop impersonating</button>
+                </form>
+            </div>
+        @endif
         <header class="topbar">
             <button class="admin-hamburger" @click="sidebarOpen = !sidebarOpen" aria-label="Toggle sidebar">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

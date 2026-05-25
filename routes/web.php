@@ -55,6 +55,15 @@ Route::post('/logout', function (\App\Livewire\Actions\Logout $logout) {
     return redirect('/');
 })->middleware('auth')->name('logout');
 
+Route::post('/stop-impersonating', function () {
+    $originalId = session('impersonator_id');
+    if ($originalId) {
+        session()->forget('impersonator_id');
+        auth()->login(\App\Models\User::findOrFail($originalId));
+    }
+    return redirect()->route('admin.customers');
+})->middleware('auth')->name('stop-impersonating');
+
 /* Customer area */
 Route::middleware(['auth', 'verified', 'role:customer|admin'])
     ->prefix('app')->name('app.')->group(function () {

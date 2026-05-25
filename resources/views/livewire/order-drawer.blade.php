@@ -47,6 +47,7 @@
                             </select>
                             <button class="ghost-btn ghost-btn-sm" type="button" @click="reassignOpen = !reassignOpen">Reassign</button>
                             <button class="ghost-btn ghost-btn-sm" type="button" wire:click="refund" wire:confirm="Refund this order and restore credits to the customer?"><x-icon name="refund" size="13" /> Refund</button>
+                            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="flagDispute" wire:confirm="Flag a dispute on this order?">Flag dispute</button>
                             <button class="ghost-btn ghost-btn-sm ghost-btn-accent" type="button" wire:click="markReady" wire:confirm="Mark this order ready for delivery?"><x-icon name="check" size="13" /> Mark ready</button>
                         </div>
                     @endif
@@ -82,9 +83,17 @@
                         <div class="card card-pad">
                             <div class="card-head">
                                 <div class="metric-label">Files</div>
-                                @if ($order->originalFile())
-                                    <button class="ghost-btn ghost-btn-sm" type="button"><x-icon name="download" size="13" /> Original</button>
-                                @endif
+                                <div x-data="{ filesMenu: false }" style="position:relative" @click.outside="filesMenu = false">
+                                    <button class="more-btn" type="button" @click="filesMenu = !filesMenu"><x-icon name="more" size="14" /></button>
+                                    <div x-show="filesMenu" x-transition x-cloak class="topbar-user-menu" style="right:0; top:100%; margin-top:4px; min-width:140px">
+                                        @if ($order->originalFile())
+                                            <button type="button" wire:click="downloadFile({{ $order->originalFile()->id }})" @click="filesMenu=false" class="topbar-user-item">Download original</button>
+                                        @endif
+                                        @if ($order->tunedFile())
+                                            <button type="button" wire:click="downloadFile({{ $order->tunedFile()->id }})" @click="filesMenu=false" class="topbar-user-item">Download tuned</button>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                             @forelse ($order->files as $f)
                                 <div class="file-row" style="display:flex; align-items:center; justify-content:space-between">
@@ -131,10 +140,10 @@
                         <div class="card card-pad" style="margin-top:14px">
                             <div class="card-head">
                                 <div class="metric-label">Timeline</div>
-                                <button class="ghost-btn ghost-btn-sm" type="button">All events</button>
+                                <button class="ghost-btn ghost-btn-sm" type="button" wire:click="toggleAllEvents">{{ $showAllEvents ? 'Last 5' : 'All events' }}</button>
                             </div>
                             <div class="timeline">
-                                @php $events = $order->events; $count = $events->count(); @endphp
+                                @php $events = $showAllEvents ? $order->events : $order->events->take(5); $count = $events->count(); @endphp
                                 @foreach ($events as $i => $e)
                                     <div class="tl-row tl-row-{{ $e->state }}">
                                         <div class="tl-dot-col">
@@ -157,10 +166,10 @@
                             <div class="card-head">
                                 <div class="metric-label">Tune preview</div>
                                 <div class="seg seg-sm">
-                                    <button class="seg-btn seg-btn-active" type="button">Torque</button>
-                                    <button class="seg-btn" type="button">Boost</button>
-                                    <button class="seg-btn" type="button">Fuel</button>
-                                    <button class="seg-btn" type="button">Ignition</button>
+                                    <button class="seg-btn {{ $chartTab === 'torque' ? 'seg-btn-active' : '' }}" wire:click="$set('chartTab', 'torque')" type="button">Torque</button>
+                                    <button class="seg-btn {{ $chartTab === 'boost' ? 'seg-btn-active' : '' }}" wire:click="$set('chartTab', 'boost')" type="button">Boost</button>
+                                    <button class="seg-btn {{ $chartTab === 'fuel' ? 'seg-btn-active' : '' }}" wire:click="$set('chartTab', 'fuel')" type="button">Fuel</button>
+                                    <button class="seg-btn {{ $chartTab === 'ignition' ? 'seg-btn-active' : '' }}" wire:click="$set('chartTab', 'ignition')" type="button">Ignition</button>
                                 </div>
                             </div>
                             <x-tune-chart :width="520" :height="180" />

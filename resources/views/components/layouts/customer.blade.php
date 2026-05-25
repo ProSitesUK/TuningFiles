@@ -5,6 +5,14 @@
 </head>
 <body>
     <div class="mk">
+        @if (session('impersonator_id'))
+            <div style="background:var(--warn); color:#000; padding:8px 16px; font-size:13px; font-weight:600; display:flex; justify-content:space-between; align-items:center">
+                <span>Impersonating {{ auth()->user()->name }} ({{ auth()->user()->email }})</span>
+                <form method="POST" action="{{ route('stop-impersonating') }}">@csrf
+                    <button type="submit" style="background:#000; color:#fff; border:0; padding:4px 12px; border-radius:4px; cursor:pointer; font-size:12px">Stop impersonating</button>
+                </form>
+            </div>
+        @endif
         <header class="mk-nav" x-data="{ mobileOpen: false }" @keydown.escape.window="mobileOpen = false">
             <div class="mk-nav-inner">
                 <a href="{{ route('app.dashboard') }}" class="mk-brand" style="text-decoration:none">

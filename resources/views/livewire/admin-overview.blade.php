@@ -22,7 +22,10 @@
                     <div class="metric-big">{{ number_format($ordersCount) }} <span class="badge badge-{{ $ordersCountDelta >= 0 ? 'green' : 'red' }} badge-soft"><span class="badge-dot"></span> {{ $ordersCountDelta >= 0 ? '+' : '' }}{{ $ordersCountDelta }}% vs prev</span></div>
                 </div>
                 <div class="seg seg-sm">
-                    <button class="seg-btn seg-btn-active" type="button">last 14d</button>
+                    @foreach (['7d','14d','30d'] as $cr)
+                        <button type="button" wire:click="$set('chartRange', '{{ $cr }}')"
+                                class="seg-btn {{ $chartRange === $cr ? 'seg-btn-active' : '' }}">last {{ $cr }}</button>
+                    @endforeach
                 </div>
             </div>
             <x-bar-chart :data="$series['orders']" />
@@ -78,11 +81,14 @@
             <div class="card-head card-pad-x">
                 <div>
                     <div class="metric-label">Top customers · {{ $range }}</div>
-                    <div class="metric-mid">By revenue</div>
+                    <div class="metric-mid">By {{ $customerSort }}</div>
                 </div>
                 <div class="card-head-r">
-                    <button class="ghost-btn" type="button">by revenue ▾</button>
-                    <button class="ghost-btn" type="button">View all</button>
+                    <button class="ghost-btn" type="button"
+                            wire:click="$set('customerSort', '{{ $customerSort === 'revenue' ? 'orders' : 'revenue' }}')">
+                        by {{ $customerSort }} ▾
+                    </button>
+                    <a href="{{ route('admin.customers') }}" class="ghost-btn" style="text-decoration:none">View all</a>
                 </div>
             </div>
             <table class="t">
