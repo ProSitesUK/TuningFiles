@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div class="grid-2" style="grid-template-columns:1fr 1fr">
             {{-- A. Invite link --}}
             <div class="card card-pad">
                 <div class="metric-label" style="margin-bottom:12px;">Invite link</div>

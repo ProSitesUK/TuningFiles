@@ -1161,6 +1161,23 @@ input { font: inherit; color: inherit; }
 @media (max-width: 480px) {
   .page { padding: 12px 12px 48px; }
   .kpi-row { grid-template-columns: 1fr; }
+  .mk-strip-inner { grid-template-columns: 1fr; }
+  .mk-tiers { grid-template-columns: 1fr; }
+  .vb-makes { grid-template-columns: 1fr; }
+  .mk-showcase { grid-template-columns: 1fr; }
+  .mk-tunes-grid { grid-template-columns: 1fr; }
+  .mk-steps { grid-template-columns: 1fr; }
+  .meta-grid { grid-template-columns: 1fr !important; }
+  .auth-row-2 { grid-template-columns: 1fr; }
+  .mk-pagehead { grid-template-columns: 1fr; }
+  .mk-pagehead-photo, .mk-pagehead-mark { display: none; }
+  .mk-hero { grid-template-columns: 1fr; }
+  .mk-hero-visual { order: -1; }
+  /* Catch all inline 2-col grids */
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Notifications dropdown */
