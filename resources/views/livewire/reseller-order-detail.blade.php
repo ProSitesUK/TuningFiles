@@ -13,12 +13,18 @@
                 <span class="mono small t-mute">{{ $order->elapsedLabel() }} elapsed</span>
             </div>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap">
+            <select wire:change="changeStatus($event.target.value)" style="padding:5px 8px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:12px; color:var(--ink)">
+                @foreach (\App\Models\Order::STATUSES as $s)
+                    <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
+                @endforeach
+            </select>
+            <button class="ghost-btn ghost-btn-sm" type="button" wire:click="markReady" wire:confirm="Mark this order ready for delivery?">Mark ready</button>
             @if ($order->originalFile())
-                <button class="ghost-btn" type="button" wire:click="downloadOriginal"><x-icon name="download" size="13" /> Original</button>
+                <button class="ghost-btn ghost-btn-sm" type="button" wire:click="downloadOriginal"><x-icon name="download" size="13" /> Original</button>
             @endif
             @if ($order->tunedFile())
-                <button class="primary-btn" type="button" wire:click="downloadTuned"><x-icon name="download" size="13" /> Tuned file</button>
+                <button class="primary-btn primary-btn-sm" type="button" wire:click="downloadTuned"><x-icon name="download" size="13" /> Tuned</button>
             @endif
         </div>
     </div>
@@ -68,6 +74,18 @@
                 @empty
                     <div class="t-mute small">No files yet.</div>
                 @endforelse
+
+                @if ($canUpload)
+                    <form wire:submit="uploadTuned" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border)">
+                        <div class="metric-label" style="margin-bottom:6px">Upload tuned file</div>
+                        <input type="file" wire:model="tunedUpload" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)" />
+                        @error('tunedUpload') <div style="color:var(--danger); margin-top:4px; font-size:12px">{{ $message }}</div> @enderror
+                        <button type="submit" class="primary-btn primary-btn-sm" style="margin-top:8px" wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="uploadTuned">Upload tuned file</span>
+                            <span wire:loading wire:target="uploadTuned">Uploading…</span>
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
