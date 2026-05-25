@@ -129,7 +129,8 @@ class CustomerCredits extends Component
 
     public function render()
     {
-        $packs = CreditPack::where('is_active', true)->orderBy('credits')->get();
+        $tenantId = auth()->user()->reseller_id;
+        $packs = CreditPack::forTenant($tenantId)->where('is_active', true)->orderBy('credits')->get();
         $tx = CreditTransaction::where('user_id', auth()->id())
             ->latest()->limit(15)->get();
 

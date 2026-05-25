@@ -85,13 +85,42 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
     });
 
 /* Reseller area */
+// To require subscription: add \App\Http\Middleware\TenantSubscribed::class to the middleware array below
 Route::middleware(['auth', 'verified', 'role:reseller'])
     ->prefix('reseller')->name('reseller.')->group(function () {
         Route::view('/',          'reseller.dashboard')->name('dashboard');
         Route::view('/customers', 'reseller.customers')->name('customers');
         Route::view('/customers/invite', 'reseller.invite')->name('invite');
         Route::view('/orders',    'reseller.orders')->name('orders');
+        Route::get('/orders/{order}', function (\App\Models\Order $order) {
+            abort_unless($order->reseller_id === auth()->id(), 403);
+            return view('reseller.order', ['order' => $order]);
+        })->name('orders.show');
+        Route::view('/pricing',   'reseller.pricing')->name('pricing');
         Route::view('/settings',  'reseller.settings')->name('settings');
+
+        // Subscription billing
+        Route::get('/plans', [\App\Http\Controllers\TenantSubscriptionController::class, 'plans'])->name('plans');
+        Route::post('/subscribe/{plan:slug}', [\App\Http\Controllers\TenantSubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::get('/billing', [\App\Http\Controllers\TenantSubscriptionController::class, 'billing'])->name('billing');
+        Route::post('/cancel', [\App\Http\Controllers\TenantSubscriptionController::class, 'cancel'])->name('cancel');
     });
+
+/* Tenant customer portal (white-label) */
+Route::prefix('t/{tenant:slug}')->name('tenant.')->group(function () {
+    Route::get('/login',  [\App\Http\Controllers\TenantAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\TenantAuthController::class, 'login']);
+    Route::get('/register',  [\App\Http\Controllers\TenantAuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [\App\Http\Controllers\TenantAuthController::class, 'register']);
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/',           [\App\Http\Controllers\TenantCustomerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders',     [\App\Http\Controllers\TenantCustomerController::class, 'orders'])->name('orders');
+        Route::get('/orders/new', [\App\Http\Controllers\TenantCustomerController::class, 'newOrder'])->name('orders.new');
+        Route::get('/orders/{order}', [\App\Http\Controllers\TenantCustomerController::class, 'showOrder'])->name('orders.show');
+        Route::get('/credits',    [\App\Http\Controllers\TenantCustomerController::class, 'credits'])->name('credits');
+        Route::get('/tickets',    [\App\Http\Controllers\TenantCustomerController::class, 'tickets'])->name('tickets');
+    });
+});
 
 require __DIR__.'/auth.php';

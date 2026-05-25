@@ -18,15 +18,21 @@
         ['id' => 'reseller.dashboard', 'label' => 'Dashboard',  'icon' => 'overview'],
         ['id' => 'reseller.customers', 'label' => 'Customers',  'icon' => 'customers', 'count' => $subCount],
         ['id' => 'reseller.orders',    'label' => 'Orders',     'icon' => 'queue',     'count' => $orderCount],
+        ['id' => 'reseller.pricing',   'label' => 'Pricing',    'icon' => 'credits'],
+        ['id' => 'reseller.billing',   'label' => 'Billing',    'icon' => 'revenue'],
         ['id' => 'reseller.settings',  'label' => 'Settings',   'icon' => 'reports'],
     ];
 
     $crumbLabels = [
-        'reseller.dashboard' => 'Dashboard',
-        'reseller.customers' => 'Customers',
-        'reseller.invite'    => 'Invite customer',
-        'reseller.orders'    => 'Orders',
-        'reseller.settings'  => 'Settings',
+        'reseller.dashboard'    => 'Dashboard',
+        'reseller.customers'    => 'Customers',
+        'reseller.invite'       => 'Invite customer',
+        'reseller.orders'       => 'Orders',
+        'reseller.orders.show'  => 'Order detail',
+        'reseller.pricing'      => 'Pricing',
+        'reseller.billing'      => 'Billing',
+        'reseller.plans'        => 'Plans',
+        'reseller.settings'     => 'Settings',
     ];
     $crumbLeaf = $crumbLabels[$route] ?? '';
 @endphp

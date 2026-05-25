@@ -9,6 +9,7 @@ use App\Models\OrderEvent;
 use App\Models\OrderFile;
 use App\Models\SiteSetting;
 use App\Models\Tune;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
@@ -132,6 +133,17 @@ class NewOrderWizard extends Component
             'customer_note'  => $this->note ?: null,
         ]);
 
+        // Auto-assign: if customer belongs to a tenant, assign the tenant user as tuner
+        // Otherwise, find the first active tuner
+        if ($user->reseller_id) {
+            $order->update(['assigned_tuner_id' => $user->reseller_id, 'assigned_at' => now()]);
+        } else {
+            $firstTuner = \App\Models\TunerProfile::where('status', '!=', 'off')->first();
+            if ($firstTuner) {
+                $order->update(['assigned_tuner_id' => $firstTuner->user_id, 'assigned_at' => now()]);
+            }
+        }
+
         OrderFile::create([
             'order_id'       => $order->id,
             'uploaded_by_id' => $user->id,
@@ -168,6 +180,14 @@ class NewOrderWizard extends Component
 
             $user->notify(new OrderQueued($order));
 
+            // Notify tenant if order is from a sub-customer
+            if ($user->reseller_id) {
+                $reseller = User::find($user->reseller_id);
+                if ($reseller) {
+                    $reseller->notify(new OrderQueued($order));
+                }
+            }
+
             $this->redirect(route('app.orders.show', $order), navigate: true);
         } else {
             // Pay-per-file: calculate GBP cost in pennies
@@ -187,6 +207,14 @@ class NewOrderWizard extends Component
             ]);
 
             $user->notify(new OrderQueued($order));
+
+            // Notify tenant if order is from a sub-customer
+            if ($user->reseller_id) {
+                $reseller = User::find($user->reseller_id);
+                if ($reseller) {
+                    $reseller->notify(new OrderQueued($order));
+                }
+            }
 
             // Dev mode: no Stripe configured -- mark completed immediately
             if (! config('cashier.secret')) {

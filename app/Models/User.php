@@ -56,6 +56,7 @@ class User extends Authenticatable
     public function isTuner(): bool      { return $this->hasRole('tuner'); }
     public function isCustomer(): bool   { return $this->hasRole('customer'); }
     public function isReseller(): bool   { return $this->hasRole('reseller'); }
+    public function isTenant(): bool    { return $this->isReseller(); }
     public function hasReseller(): bool  { return $this->reseller_id !== null; }
 
     public function initials(): string

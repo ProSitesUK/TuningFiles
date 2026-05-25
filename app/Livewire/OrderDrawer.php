@@ -110,6 +110,14 @@ class OrderDrawer extends Component
 
         if ($order->customer) {
             $order->customer->notify(new OrderReady($order));
+
+            // Notify tenant if order is from a sub-customer
+            if ($order->customer->reseller_id) {
+                $reseller = User::find($order->customer->reseller_id);
+                if ($reseller) {
+                    $reseller->notify(new OrderReady($order));
+                }
+            }
         }
 
         // Credit referral on first delivered order

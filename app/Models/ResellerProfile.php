@@ -12,7 +12,13 @@ class ResellerProfile extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $casts = ['is_active' => 'bool', 'commission_percent' => 'int', 'max_customers' => 'int'];
+    protected $casts = [
+        'is_active'          => 'bool',
+        'commission_percent' => 'int',
+        'max_customers'      => 'int',
+        'domain_verified'    => 'bool',
+        'trial_ends_at'      => 'datetime',
+    ];
 
     public function user(): BelongsTo
     {
@@ -32,5 +38,25 @@ class ResellerProfile extends Model
     public function canAddCustomer(): bool
     {
         return $this->max_customers === 0 || $this->subCustomers()->count() < $this->max_customers;
+    }
+
+    public function isSubscribed(): bool
+    {
+        return in_array($this->subscription_status, ['active', 'trialing']);
+    }
+
+    public function hasExpired(): bool
+    {
+        return in_array($this->subscription_status, ['past_due', 'cancelled', null, 'none']);
+    }
+
+    public function tenantUrl(): string
+    {
+        return url('/t/' . $this->slug);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }

@@ -41,7 +41,7 @@
                 </tr></thead>
                 <tbody>
                     @forelse ($orders as $o)
-                        <tr class="t-row">
+                        <tr class="t-row" style="cursor:pointer" onclick="window.location='{{ route('reseller.orders.show', $o) }}'">
                             <td class="mono">#{{ $o->reference }}</td>
                             <td>{{ $o->customer?->name ?? '—' }}</td>
                             <td>{{ $o->vehicle_label }}</td>

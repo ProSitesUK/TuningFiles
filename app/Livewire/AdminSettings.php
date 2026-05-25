@@ -43,6 +43,9 @@ class AdminSettings extends Component
             'referral_enabled'           => SiteSetting::get('referral_enabled', 'false'),
             'referral_credits_referrer'  => SiteSetting::get('referral_credits_referrer', '10'),
             'referral_credits_referred'  => SiteSetting::get('referral_credits_referred', '10'),
+
+            // Custom domains
+            'custom_domains_enabled'     => SiteSetting::get('custom_domains_enabled', 'false'),
         ];
     }
 
@@ -79,6 +82,9 @@ class AdminSettings extends Component
             'form.referral_enabled'          => 'required|in:true,false',
             'form.referral_credits_referrer' => 'required|integer|min:0|max:1000',
             'form.referral_credits_referred' => 'required|integer|min:0|max:1000',
+
+            // Custom domains
+            'form.custom_domains_enabled'    => 'required|in:true,false',
         ], [
             'form.ga4_measurement_id.regex' => 'GA4 measurement IDs look like G-XXXXXXXXXX.',
         ]);

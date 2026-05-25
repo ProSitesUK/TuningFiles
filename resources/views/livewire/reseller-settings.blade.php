@@ -40,6 +40,35 @@
                     @error('bio')<span class="va-err">{{ $message }}</span>@enderror
                 </label>
 
+                @if ($this->customDomainsEnabled())
+                    <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border)">
+                        <div class="va-form-title">Custom domain</div>
+                        <label class="va-field">
+                            <span>Domain name</span>
+                            <input wire:model="custom_domain" type="text" placeholder="tune.yourdomain.com" />
+                            @error('custom_domain')<span class="va-err">{{ $message }}</span>@enderror
+                        </label>
+
+                        @if ($domain_verified)
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px">
+                                <span class="badge badge-success">verified</span>
+                                <span class="t-mute small">Your custom domain is active.</span>
+                            </div>
+                        @elseif ($custom_domain)
+                            <div class="card card-pad" style="background:var(--surface-2); margin-bottom:10px">
+                                <div class="metric-label" style="margin-bottom:6px">CNAME setup required</div>
+                                <p class="t-mute small" style="margin-bottom:6px">
+                                    Point your domain to <code>tuningfiles.app</code> via a CNAME record in your DNS settings.
+                                </p>
+                                <div class="mono small" style="padding:6px 10px; background:var(--bg); border:1px solid var(--border); border-radius:4px">
+                                    {{ $custom_domain }} CNAME tuningfiles.app
+                                </div>
+                                <p class="t-mute small" style="margin-top:6px">Once propagated, verification will happen automatically.</p>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="va-form-actions">
                     <button type="submit" class="primary-btn">Save settings</button>
                 </div>

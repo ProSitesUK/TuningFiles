@@ -19,6 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
+
+        $middleware->redirectGuestsTo(function ($request) {
+            // Redirect tenant portal guests to the tenant login page
+            if ($slug = $request->route('tenant')?->slug ?? $request->route('tenant')) {
+                return route('tenant.login', ['tenant' => $slug]);
+            }
+
+            return route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

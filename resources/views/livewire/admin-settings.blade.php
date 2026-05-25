@@ -188,6 +188,18 @@
             </label>
         </div>
 
+        <div class="va-form-title" style="margin-top:18px">System</div>
+        <div class="va-grid-2" style="margin-bottom:14px">
+            <label class="va-field">
+                <span>Custom domains for resellers</span>
+                <select wire:model.defer="form.custom_domains_enabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+                <em class="t-mute small">Allow resellers to configure a custom domain for their tenant portal.</em>
+            </label>
+        </div>
+
         <div class="va-form-actions" style="margin-top: 18px">
             <button type="submit" class="primary-btn primary-btn-lg" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="save">Save settings</span>
