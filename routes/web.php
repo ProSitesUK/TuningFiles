@@ -39,8 +39,12 @@ Route::get('/robots.txt',  [\App\Http\Controllers\SitemapController::class, 'rob
 Route::get('/dashboard', function () {
     $u = Auth::user();
     if (! $u) return redirect()->route('login');
-    if ($u->isAdmin() || $u->isTuner()) return redirect()->route('admin.live');
+    // Strip legacy tuner role from resellers (created before role fix)
+    if ($u->isReseller() && $u->isTuner()) {
+        $u->removeRole('tuner');
+    }
     if ($u->isReseller()) return redirect()->route('reseller.dashboard');
+    if ($u->isAdmin() || $u->isTuner()) return redirect()->route('admin.live');
     return redirect()->route('app.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

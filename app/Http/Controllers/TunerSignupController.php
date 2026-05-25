@@ -34,7 +34,7 @@ class TunerSignupController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->syncRoles(['customer', 'reseller', 'tuner']);
+        $user->syncRoles(['customer', 'reseller']);
         $user->markEmailAsVerified();
 
         CustomerProfile::create([

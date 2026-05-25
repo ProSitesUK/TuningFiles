@@ -32,7 +32,7 @@ class CustomersScreen extends Component
     public function makeReseller(int $userId): void
     {
         $user = User::findOrFail($userId);
-        $user->syncRoles(['customer', 'reseller', 'tuner']);
+        $user->syncRoles(['customer', 'reseller']);
 
         ResellerProfile::firstOrCreate(
             ['user_id' => $user->id],
