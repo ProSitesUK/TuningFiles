@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', 'role:customer|admin'])
             return view('app.orders.show', ['order' => $order]);
         })->name('orders.show');
         Route::view('/credits', 'app.credits')->name('credits');
+        Route::view('/referrals', 'app.referrals')->name('referrals');
         Route::view('/tickets', 'app.tickets.index')->name('tickets.index');
         Route::view('/tickets/new', 'app.tickets.new')->name('tickets.new');
         Route::get('/tickets/{ticket}', function (\App\Models\Ticket $ticket) {

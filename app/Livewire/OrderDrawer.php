@@ -122,6 +122,9 @@ class OrderDrawer extends Component
 
         // Credit referral on first delivered order
         ReferralService::creditReferral($order);
+
+        // Process ongoing referral commission
+        ReferralService::processOrderCommission($order);
     }
 
     public function refund(): void

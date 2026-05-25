@@ -43,6 +43,11 @@ class AdminSettings extends Component
             'referral_enabled'           => SiteSetting::get('referral_enabled', 'false'),
             'referral_credits_referrer'  => SiteSetting::get('referral_credits_referrer', '10'),
             'referral_credits_referred'  => SiteSetting::get('referral_credits_referred', '10'),
+            'referral_commission_tiers'  => SiteSetting::get('referral_commission_tiers', json_encode([
+                ['threshold_pennies' => 10000, 'percent' => 2, 'label' => '£100+'],
+                ['threshold_pennies' => 100000, 'percent' => 3, 'label' => '£1,000+'],
+                ['threshold_pennies' => 1000000, 'percent' => 5, 'label' => '£10,000+'],
+            ])),
 
             // Custom domains
             'custom_domains_enabled'     => SiteSetting::get('custom_domains_enabled', 'false'),
@@ -82,6 +87,7 @@ class AdminSettings extends Component
             'form.referral_enabled'          => 'required|in:true,false',
             'form.referral_credits_referrer' => 'required|integer|min:0|max:1000',
             'form.referral_credits_referred' => 'required|integer|min:0|max:1000',
+            'form.referral_commission_tiers' => 'nullable|json',
 
             // Custom domains
             'form.custom_domains_enabled'    => 'required|in:true,false',

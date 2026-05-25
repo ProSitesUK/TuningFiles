@@ -15,6 +15,11 @@ class SiteSettingsSeeder extends Seeder
             'title_template'      => '{title} · {site}',
             'default_robots'      => 'index,follow',
             'footer_company_line' => '© '.date('Y').' tuningfiles ltd · Bristol, UK',
+            'referral_commission_tiers' => json_encode([
+                ['threshold_pennies' => 10000, 'percent' => 2, 'label' => '£100+'],
+                ['threshold_pennies' => 100000, 'percent' => 3, 'label' => '£1,000+'],
+                ['threshold_pennies' => 1000000, 'percent' => 5, 'label' => '£10,000+'],
+            ]),
         ];
 
         foreach ($defaults as $key => $value) {

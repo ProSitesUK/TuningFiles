@@ -176,6 +176,16 @@ class NewOrderWizard extends Component
             // Deduct credits (existing flow)
             if ($user->customerProfile) {
                 $user->customerProfile->decrement('credit_balance', $cost);
+
+                CreditTransaction::create([
+                    'user_id'        => $user->id,
+                    'order_id'       => $order->id,
+                    'type'           => 'spend',
+                    'credits'        => -$cost,
+                    'balance_after'  => $user->customerProfile->credit_balance,
+                    'amount_pennies' => $cost * (int) SiteSetting::get('credit_rate_pennies', '100'),
+                    'note'           => "Order #{$order->reference}",
+                ]);
             }
 
             $user->notify(new OrderQueued($order));

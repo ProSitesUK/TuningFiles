@@ -48,14 +48,25 @@
 
     {{-- Refer a friend --}}
     @if (\App\Models\SiteSetting::get('referral_enabled', 'false') === 'true')
+        @php
+            $myReferrals = \App\Models\Referral::where('referrer_id', auth()->id())->get();
+            $refCount = $myReferrals->count();
+            $refEarned = $myReferrals->sum('commission_earned_pennies');
+        @endphp
         <div class="card card-pad" style="margin-bottom:18px">
             <div class="card-head">
                 <div class="metric-label">Refer a workshop</div>
+                @if ($refCount > 0)
+                    <span class="t-mute small">{{ $refCount }} referred &middot; &pound;{{ number_format($refEarned / 100, 2) }} earned</span>
+                @endif
             </div>
-            <p class="t-mute small" style="margin-bottom:8px">Share your link — both you and your friend get {{ \App\Models\SiteSetting::get('referral_credits_referrer', '10') }} free credits when they place their first order.</p>
+            <p class="t-mute small" style="margin-bottom:8px">Share your link — both you and your friend get {{ \App\Models\SiteSetting::get('referral_credits_referrer', '10') }} free credits when they place their first order. Plus, earn ongoing commission on everything they spend.</p>
             <div style="display:flex; gap:8px">
                 <input type="text" readonly value="{{ auth()->user()->referralUrl() }}" style="flex:1; padding:7px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); font-size:12px; font-family:var(--font-mono)" />
                 <button type="button" onclick="navigator.clipboard.writeText('{{ auth()->user()->referralUrl() }}')" class="ghost-btn ghost-btn-sm">Copy</button>
+            </div>
+            <div style="margin-top:8px">
+                <a href="{{ route('app.referrals') }}" style="color:var(--accent); font-size:13px; text-decoration:none">View referral dashboard &rarr;</a>
             </div>
         </div>
     @endif

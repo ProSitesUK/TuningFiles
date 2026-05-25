@@ -187,6 +187,12 @@
                 <em class="t-mute small">Credits awarded to the new customer.</em>
             </label>
         </div>
+        <label class="va-field" style="margin-top:10px">
+            <span>Commission tiers <em class="t-mute small">(JSON — each tier: threshold_pennies, percent, label)</em></span>
+            <textarea wire:model.defer="form.referral_commission_tiers" rows="6" class="ab-body-input" placeholder='[{"threshold_pennies": 10000, "percent": 2, "label": "£100+"}]'></textarea>
+            @error('form.referral_commission_tiers') <em class="va-err">{{ $message }}</em> @enderror
+            <em class="t-mute small">Referrer earns the tier's percentage on every order their referred users place. Rates apply to future spend (not retroactive).</em>
+        </label>
 
         <div class="va-form-title" style="margin-top:18px">System</div>
         <div class="va-grid-2" style="margin-bottom:14px">
