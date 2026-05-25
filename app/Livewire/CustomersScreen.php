@@ -51,27 +51,31 @@ class CustomersScreen extends Component
         $user->removeRole('tuner');
     }
 
-    public function toggleRole(int $userId, string $role): void
+    public function setRole(int $userId, string $role): void
     {
-        $allowed = ['admin', 'operations', 'tuner', 'customer', 'reseller'];
+        $allowed = ['customer', 'reseller', 'admin'];
         if (! in_array($role, $allowed, true)) return;
 
         $user = User::findOrFail($userId);
 
-        if ($user->hasRole($role)) {
-            $user->removeRole($role);
-        } else {
-            $user->assignRole($role);
-            if ($role === 'reseller') {
-                ResellerProfile::firstOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'business_name' => $user->name . "'s Tuning",
-                        'slug' => \Illuminate\Support\Str::slug($user->name . '-tuning-' . $user->id),
-                        'is_active' => true,
-                    ]
-                );
-            }
+        // Roles are mutually exclusive — sync replaces all existing roles
+        $roles = match ($role) {
+            'customer' => ['customer'],
+            'reseller' => ['reseller'],
+            'admin'    => ['admin', 'operations'],
+        };
+
+        $user->syncRoles($roles);
+
+        if ($role === 'reseller') {
+            ResellerProfile::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'business_name' => $user->name . "'s Tuning",
+                    'slug' => \Illuminate\Support\Str::slug($user->name . '-tuning-' . $user->id),
+                    'is_active' => true,
+                ]
+            );
         }
     }
 

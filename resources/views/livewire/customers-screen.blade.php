@@ -104,25 +104,33 @@
                         <span class="t-mute small">Customer can request invoices instead of paying upfront</span>
                     </div>
 
-                    {{-- Role management --}}
+                    {{-- Role --}}
                     <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border)">
-                        <div class="metric-label" style="margin-bottom:8px">Roles</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px">
-                            @foreach (['customer', 'reseller', 'tuner', 'operations', 'admin'] as $role)
-                                <label style="display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border:1px solid var(--border); border-radius:var(--r-sm); font-size:12.5px; cursor:pointer; background:{{ $sel->hasRole($role) ? 'var(--accent-soft)' : 'var(--surface)' }}">
-                                    <input type="checkbox"
-                                           wire:click="toggleRole({{ $sel->id }}, '{{ $role }}')"
-                                           {{ $sel->hasRole($role) ? 'checked' : '' }}
-                                           style="margin:0" />
-                                    {{ ucfirst($role) }}
-                                </label>
+                        <div class="metric-label" style="margin-bottom:8px">Account type</div>
+                        @php
+                            $currentRole = $sel->hasRole('admin') ? 'admin' : ($sel->hasRole('reseller') ? 'reseller' : 'customer');
+                        @endphp
+                        <div style="display:flex; gap:6px; flex-wrap:wrap">
+                            @foreach ([
+                                ['customer', 'Customer', 'Can buy tuning files and manage their orders'],
+                                ['reseller', 'Reseller / SaaS tuner', 'Own portal, own customers, own pricing — processes files'],
+                                ['admin', 'Admin', 'Full platform access — manage everything'],
+                            ] as [$role, $label, $desc])
+                                <button type="button"
+                                        wire:click="setRole({{ $sel->id }}, '{{ $role }}')"
+                                        {{ $currentRole === $role ? 'wire:confirm=Already set' : '' }}
+                                        class="auth-plan {{ $currentRole === $role ? 'auth-plan-on' : '' }}"
+                                        style="flex:1; min-width:140px; cursor:pointer">
+                                    <div class="auth-plan-head">
+                                        <span>{{ $label }}</span>
+                                    </div>
+                                    <div class="auth-plan-sub small">{{ $desc }}</div>
+                                </button>
                             @endforeach
                         </div>
-                        <p class="t-mute small" style="margin-top:6px">
-                            @if ($sel->hasRole('reseller') && $sel->resellerProfile)
-                                Reseller: {{ $sel->resellerProfile->business_name }} · {{ $sel->subCustomers()->count() }} sub-customers
-                            @endif
-                        </p>
+                        @if ($sel->hasRole('reseller') && $sel->resellerProfile)
+                            <p class="t-mute small" style="margin-top:6px">Portal: {{ $sel->resellerProfile->business_name }} · {{ $sel->subCustomers()->count() }} sub-customers</p>
+                        @endif
                     </div>
 
                     <div class="cust-orders-head">
