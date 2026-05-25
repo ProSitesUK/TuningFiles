@@ -64,6 +64,9 @@
                             <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
                         </div>
                     </div>
+                    @if ($f->notes)
+                        <div class="t-mute small" style="margin-top:4px; font-style:italic">{{ $f->notes }}</div>
+                    @endif
                 @empty
                     <div class="t-mute small">No files yet.</div>
                 @endforelse

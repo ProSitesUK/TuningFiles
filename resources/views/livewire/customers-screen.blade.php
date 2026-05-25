@@ -10,7 +10,7 @@
                 <x-icon name="search" size="13" />
                 <input wire:model.live.debounce.250ms="search" placeholder="Find customer…" />
             </div>
-            <div class="chips chips-tight">
+            <div class="chips chips-tight" style="display:flex; align-items:center; flex-wrap:wrap">
                 @foreach ([
                     ['all',   'All'],
                     ['Pro',   'Pro'],
@@ -21,6 +21,13 @@
                     <button type="button" wire:click="$set('filter', '{{ $id }}')"
                             class="chip chip-sm {{ $filter === $id ? 'chip-active' : '' }}">{{ $label }}</button>
                 @endforeach
+                <select wire:model.live="resellerFilter" style="padding:5px 8px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); font-size:12px; color:var(--ink); margin-left:8px">
+                    <option value="all">All sources</option>
+                    <option value="direct">Direct customers</option>
+                    @foreach ($resellers as $r)
+                        <option value="{{ $r->user_id }}">{{ $r->business_name }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="cust-list">
                 @foreach ($customers as $u)
@@ -34,7 +41,11 @@
                                 @php $kind = $cp?->plan === 'VIP' ? 'purple' : ($cp?->plan === 'Trade' ? 'blue' : 'neutral'); @endphp
                                 <span class="badge badge-{{ $kind }}">{{ $cp?->plan ?? 'Pro' }}</span>
                             </div>
-                            <div class="cust-row-meta mono small">{{ $u->orders_count }} orders · £{{ number_format(($cp?->total_spent_pennies ?? 0) / 100) }}</div>
+                            <div class="cust-row-meta mono small">{{ $u->orders_count }} orders · £{{ number_format(($cp?->total_spent_pennies ?? 0) / 100) }}
+                                @if ($u->reseller_id)
+                                    · <span class="badge badge-neutral" style="font-size:9px">{{ $u->reseller?->resellerProfile?->business_name ?? 'reseller' }}</span>
+                                @endif
+                            </div>
                         </div>
                         <span class="dot dot-ok"></span>
                     </button>
@@ -74,6 +85,12 @@
                         <div class="cust-kpi {{ $disputesCount > 0 ? 'cust-kpi-warn' : '' }}"><div class="metric-label">Disputes</div><div class="cust-kpi-val">{{ $disputesCount }}</div></div>
                         <div class="cust-kpi"><div class="metric-label">Refunds</div><div class="cust-kpi-val">{{ $refundsTotal > 0 ? '£'.$refundsTotal : '£0' }}</div></div>
                     </div>
+
+                    @if ($sel->reseller_id)
+                        <div style="margin-bottom:14px; padding:8px 12px; background:var(--surface-2); border-radius:var(--r-sm); font-size:12.5px">
+                            <span class="t-mute">Reseller:</span> <strong>{{ $sel->reseller?->resellerProfile?->business_name ?? '—' }}</strong>
+                        </div>
+                    @endif
 
                     {{-- Invoice permission toggle --}}
                     <div style="display:flex; align-items:center; gap:10px; margin-top:8px; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:6px">

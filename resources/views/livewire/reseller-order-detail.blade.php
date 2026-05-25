@@ -71,6 +71,13 @@
                             <div class="t-mute small mono">{{ $f->humanSize() }} · md5 {{ substr($f->md5 ?? '', 0, 8) }}… · {{ $f->kind }}</div>
                         </div>
                     </div>
+                    <div style="margin-top:6px">
+                        <textarea wire:change="saveFileNote({{ $f->id }}, $event.target.value)"
+                                  rows="2"
+                                  placeholder="Add a note about this file…"
+                                  style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface-2); color:var(--ink); font-size:12px; font-family:inherit; resize:vertical"
+                        >{{ $f->notes }}</textarea>
+                    </div>
                 @empty
                     <div class="t-mute small">No files yet.</div>
                 @endforelse

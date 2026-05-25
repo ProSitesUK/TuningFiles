@@ -209,6 +209,13 @@ class OrderDrawer extends Component
         $this->reassignTo = null;
     }
 
+    public function saveFileNote(int $fileId, string $notes): void
+    {
+        $file = OrderFile::findOrFail($fileId);
+        abort_unless(auth()->user()->isAdmin() || auth()->user()->isTuner(), 403);
+        $file->update(['notes' => trim($notes) ?: null]);
+    }
+
     public function downloadFile(int $fileId)
     {
         abort_unless(auth()->user()->isAdmin() || auth()->user()->isTuner(), 403);

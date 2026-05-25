@@ -11,9 +11,10 @@ use Livewire\Component;
 
 class CustomersScreen extends Component
 {
-    public string $filter   = 'all';
-    public string $search   = '';
-    public ?int   $selected = null;
+    public string $filter         = 'all';
+    public string $resellerFilter = 'all';
+    public string $search         = '';
+    public ?int   $selected       = null;
 
     public function selectCustomer(int $id): void
     {
@@ -69,6 +70,12 @@ class CustomersScreen extends Component
             });
         }
 
+        if ($this->resellerFilter === 'direct') {
+            $q->whereNull('reseller_id');
+        } elseif ($this->resellerFilter !== 'all') {
+            $q->where('reseller_id', (int) $this->resellerFilter);
+        }
+
         $customers = $q->orderByDesc('orders_count')->get();
 
         if ($this->selected && $customers->whereStrict('id', $this->selected)->isEmpty()) {
@@ -86,12 +93,15 @@ class CustomersScreen extends Component
         $disputesCount = $sel ? Dispute::whereIn('order_id', $orders->pluck('id'))->where('status', 'open')->count() : 0;
         $refundsTotal  = $sel ? Order::where('customer_id', $sel->id)->where('status', 'refunded')->sum('credits_cost') : 0;
 
+        $resellers = \App\Models\ResellerProfile::with('user:id,name')->where('is_active', true)->get();
+
         return view('livewire.customers-screen', [
             'customers'     => $customers,
             'sel'           => $sel,
             'orders'        => $orders,
             'disputesCount' => $disputesCount,
             'refundsTotal'  => $refundsTotal,
+            'resellers'     => $resellers,
         ]);
     }
 }

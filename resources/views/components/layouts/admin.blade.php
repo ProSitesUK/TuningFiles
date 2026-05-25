@@ -28,6 +28,7 @@
         ['heading' => 'Directory', 'items' => [
             ['id' => 'admin.customers','label' => 'Customers',   'icon' => 'customers','count' => $customersK >= 1000 ? round($customersK / 1000, 1).'k' : $customersK],
             ['id' => 'admin.tuners',   'label' => 'Tuners',      'icon' => 'tuners',   'count' => $tunersCount],
+            ['id' => 'admin.resellers','label' => 'Resellers',    'icon' => 'customers'],
             ['id' => 'admin.vehicles', 'label' => 'Vehicles DB', 'icon' => 'vehicles'],
         ]],
         ['heading' => 'Business', 'items' => [
@@ -54,6 +55,7 @@
         'admin.tickets'   => ['Operations', 'Tickets'],
         'admin.customers' => ['Directory', 'Customers'],
         'admin.tuners'    => ['Directory', 'Tuners'],
+        'admin.resellers' => ['Directory', 'Resellers'],
         'admin.vehicles'  => ['Directory', 'Vehicles DB'],
         'admin.revenue'   => ['Business', 'Revenue'],
         'admin.credits'   => ['Business', 'Credits'],

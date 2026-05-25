@@ -72,6 +72,14 @@ class ResellerOrderDetail extends Component
         return response()->download(storage_path('app/private/' . $f->path), "tuned_{$order->reference}.bin");
     }
 
+    public function saveFileNote(int $fileId, string $notes): void
+    {
+        $file = OrderFile::findOrFail($fileId);
+        $order = $file->order;
+        abort_unless($order && $order->reseller_id === auth()->id(), 403);
+        $file->update(['notes' => trim($notes) ?: null]);
+    }
+
     public function uploadTuned(): void
     {
         $this->validate(['tunedUpload' => 'required|file|max:10240']);

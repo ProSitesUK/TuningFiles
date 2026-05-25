@@ -91,6 +91,7 @@ Route::middleware(['auth', 'verified', 'role:admin|operations|tuner'])
         Route::view('/blog',      'admin.blog')->name('blog');
         Route::view('/dyno-results', 'admin.dyno-results')->name('dyno-results');
         Route::view('/seo',       'admin.seo')->name('seo');
+        Route::view('/resellers', 'admin.resellers')->name('resellers');
         Route::view('/settings',  'admin.settings')->name('settings');
     });
 
